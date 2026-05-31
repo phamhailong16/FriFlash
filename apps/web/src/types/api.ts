@@ -12,12 +12,19 @@ export interface AuthResponse {
 
 export interface Deck {
   id: string;
-  user_id: string;
   name: string;
   description: string | null;
   card_count: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DeckListResponse {
+  items: Deck[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
 }
 
 export interface VariantGroup {

@@ -2,7 +2,7 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Phase 1 hoàn thành — scaffold, auth, database models. Đang phát triển tích cực.
+> **Trạng thái:** Phase 2 hoàn thành — Deck Management (CRUD, search, pagination, merge, bulk delete). Đang phát triển tích cực.
 
 ## Tính năng (MVP)
 
@@ -77,18 +77,21 @@ friflash/
 │   │   └── src/
 │   │       ├── components/
 │   │       │   ├── layout/           # AppShell, BottomNav, PageHeader
+│   │       │   ├── decks/            # DeckCard, DeckForm ✅
 │   │       │   └── study/            # SwipeableCard, Flashcard (Phase 5)
-│   │       ├── lib/                  # api.ts, messages.ts (ERR-* strings), queryClient
-│   │       ├── pages/                # AuthPage, DecksPage, StudyPage, StatsPage
+│   │       ├── hooks/                # useDecks ✅ (TanStack Query hooks)
+│   │       ├── lib/                  # api.ts, decks.ts ✅, messages.ts, queryClient
+│   │       ├── pages/                # AuthPage, DecksPage ✅, StudyPage, StatsPage
 │   │       ├── store/                # authStore, settingsStore
 │   │       └── types/api.ts          # TypeScript interfaces
 │   └── api/                          # FastAPI backend
+│       ├── migrations/versions/      # 001_initial_schema.py ✅
 │       └── app/
-│           ├── api/v1/               # auth, decks, words, study, stats, import
+│           ├── api/v1/               # auth ✅, decks ✅, words, study, stats, import
 │           ├── core/                 # config, security (JWT), deps (auth middleware)
 │           ├── db/models/            # User, Deck, Word, VariantGroup, StudySession
-│           ├── schemas/              # Pydantic request/response
-│           └── services/             # hanzii.py, import_service.py, stats_service.py
+│           ├── schemas/              # auth ✅, deck ✅ (Pydantic request/response)
+│           └── services/             # deck ✅, hanzii.py, import_service.py, stats_service.py
 ├── FriFlash_BRD.docx                 # Business Requirements
 ├── FriFlash_FRD.docx                 # Functional Requirements
 └── CLAUDE.md                         # Hướng dẫn cho Claude Code
@@ -99,8 +102,8 @@ friflash/
 | Phase | Nội dung | Trạng thái |
 |---|---|---|
 | 1 | Foundation — monorepo, auth, DB models | ✅ Hoàn thành |
-| 2 | Deck Management — CRUD, search, pagination | 🔜 Tiếp theo |
-| 3 | Word Management — CRUD, auto-lookup hanzii.net | 🔜 |
+| 2 | Deck Management — CRUD, search, pagination, merge | ✅ Hoàn thành |
+| 3 | Word Management — CRUD, auto-lookup hanzii.net | 🔜 Tiếp theo |
 | 4 | Import — Excel / Google Sheets | 🔜 |
 | 5 | Study Mode — card flip, swipe gestures | 🔜 |
 | 6 | Statistics — charts, word status breakdown | 🔜 |

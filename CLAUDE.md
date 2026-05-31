@@ -115,9 +115,22 @@ Full catalog in `FriFlash_FRD.docx` Section IX.
 - Zustand stores: authStore, settingsStore (persisted)
 - TanStack Query client, Axios instance with auth interceptor + auto-refresh
 
-### Phase 2 — Deck Management 🔜
-Endpoints: `GET/POST/PATCH/DELETE /api/v1/decks`, merge, bulk delete, search with pagination.
-UI: DeckCard, DeckForm modal, search bar (300ms debounce), pagination controls (10/20/50), empty state, FAB.
+### Phase 2 — Deck Management ✅ (2026-05-31)
+Endpoints: `GET /api/v1/decks` (search + pagination) · `POST` · `PATCH /:id` · `DELETE /:id` · `POST /bulk-delete` · `POST /merge` — tất cả có auth guard.
+UI: DeckCard (dropdown menu, bulk select mode) · DeckForm modal (React Hook Form + Zod, Vietnamese errors) · search debounce 300ms · pagination 10/20/50 · empty state · FAB.
+
+New files:
+- `apps/api/migrations/versions/001_initial_schema.py` — migration thủ công tạo 5 tables (viết tay vì PostgreSQL chưa chạy khi autogenerate)
+- `apps/api/app/schemas/deck.py` — DeckCreate, DeckUpdate, DeckOut, MergeRequest, BulkDeleteRequest
+- `apps/api/app/services/deck.py` — DeckService tách hoàn toàn khỏi router
+- `apps/api/app/api/v1/decks.py` — 6 endpoints
+- `apps/web/src/lib/decks.ts` — API client functions
+- `apps/web/src/hooks/useDecks.ts` — TanStack Query hooks
+- `apps/web/src/components/decks/DeckCard.tsx`
+- `apps/web/src/components/decks/DeckForm.tsx`
+- `apps/web/src/pages/DecksPage.tsx` — fully implemented
+
+⚠️ **Trước khi test:** Start PostgreSQL, sau đó chạy `.venv/Scripts/python.exe -m alembic upgrade head` trong `apps/api/`.
 
 ### Phase 3 — Word Management 🔜
 Endpoints: CRUD `/api/v1/decks/:id/words`, lookup proxy to hanzii.net.
@@ -150,3 +163,6 @@ k6 perf audit, Sentry, deploy Vercel + Railway, CORS hardening.
 | State management | TanStack Query (server) + Zustand (UI) | TQ handles cache/invalidation/optimistic updates; Zustand handles ephemeral session state |
 | Study session data | Client-side Zustand during session, fire-and-forget evaluate API | Offline-tolerant; swipe feedback is instant regardless of network |
 | `card_count` cache | Explicit update on word create/delete (no DB trigger) | Triggers add hidden complexity; explicit is easier to reason about |
+| Alembic migration (Phase 2) | Viết migration thủ công thay vì `--autogenerate` | `autogenerate` yêu cầu kết nối DB live; PostgreSQL chưa chạy trên máy dev Windows nên viết tay từ model definitions |
+| Delete confirmation (Phase 2) | `window.confirm()` thay vì custom Dialog | Chưa có component library Dialog; `window.confirm` đủ dùng cho MVP, sẽ nâng cấp ở Phase 7 polish |
+| Service layer (Phase 2) | `app/services/deck.py` tách khỏi router | Theo pattern đã đặt ra — giữ router mỏng, dễ test service riêng biệt |

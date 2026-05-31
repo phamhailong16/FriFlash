@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical, Pencil, Trash2, BookOpen } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, BookOpen, GitMerge } from "lucide-react";
 import type { Deck } from "../../types/api";
 
 interface DeckCardProps {
@@ -11,6 +11,7 @@ interface DeckCardProps {
   onDelete: (deck: Deck) => void;
   onSelect?: (id: string) => void;
   onOpen?: (deck: Deck) => void;
+  onMerge?: (deck: Deck) => void;
 }
 
 export function DeckCard({
@@ -21,6 +22,7 @@ export function DeckCard({
   onDelete,
   onSelect,
   onOpen,
+  onMerge,
 }: DeckCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -99,6 +101,19 @@ export function DeckCard({
                       <Pencil className="w-3.5 h-3.5" />
                       Chỉnh sửa
                     </button>
+                    {onMerge && (
+                      <button
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          onMerge(deck);
+                        }}
+                      >
+                        <GitMerge className="w-3.5 h-3.5" />
+                        Gộp vào...
+                      </button>
+                    )}
                     <button
                       className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       onClick={(e) => {

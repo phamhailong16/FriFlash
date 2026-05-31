@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BookOpen, Trophy, Layers, Flame } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { ActivityChart } from "@/components/stats/ActivityChart";
 import { WordStatusBreakdown } from "@/components/stats/WordStatusBreakdown";
 import { DeckStatsTable } from "@/components/stats/DeckStatsTable";
@@ -45,6 +46,18 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
+function StatCardSkeleton() {
+  return (
+    <div className="bg-white rounded-xl border border-[#E8E0D5] p-4 flex items-center gap-3">
+      <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-6 w-14" />
+        <Skeleton className="h-3 w-20" />
+      </div>
+    </div>
+  );
+}
+
 export function StatsPage() {
   const [days, setDays] = useState<DayOption>(30);
 
@@ -59,30 +72,41 @@ export function StatsPage() {
       <div className="px-4 space-y-4 mt-2">
         {/* Overview cards */}
         <div className="grid grid-cols-2 gap-3">
-          <StatCard
-            icon={<Layers size={18} />}
-            label="Bộ thẻ"
-            value={overviewLoading ? "—" : (overview?.total_decks ?? 0)}
-            color="#C0392B"
-          />
-          <StatCard
-            icon={<BookOpen size={18} />}
-            label="Tổng từ"
-            value={overviewLoading ? "—" : (overview?.total_words ?? 0)}
-            color="#3B82F6"
-          />
-          <StatCard
-            icon={<Trophy size={18} />}
-            label="Đã thuộc"
-            value={overviewLoading ? "—" : (overview?.mastered_words ?? 0)}
-            color="#27AE60"
-          />
-          <StatCard
-            icon={<Flame size={18} />}
-            label="Chuỗi ngày học"
-            value={overviewLoading ? "—" : `${overview?.streak_days ?? 0} ngày`}
-            color="#F39C12"
-          />
+          {overviewLoading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatCard
+                icon={<Layers size={18} />}
+                label="Bộ thẻ"
+                value={overview?.total_decks ?? 0}
+                color="#C0392B"
+              />
+              <StatCard
+                icon={<BookOpen size={18} />}
+                label="Tổng từ"
+                value={overview?.total_words ?? 0}
+                color="#3B82F6"
+              />
+              <StatCard
+                icon={<Trophy size={18} />}
+                label="Đã thuộc"
+                value={overview?.mastered_words ?? 0}
+                color="#27AE60"
+              />
+              <StatCard
+                icon={<Flame size={18} />}
+                label="Chuỗi ngày học"
+                value={`${overview?.streak_days ?? 0} ngày`}
+                color="#F39C12"
+              />
+            </>
+          )}
         </div>
 
         {/* Activity chart */}
@@ -104,9 +128,7 @@ export function StatsPage() {
             ))}
           </div>
           {activityLoading ? (
-            <div className="h-40 flex items-center justify-center text-sm text-gray-400">
-              Đang tải...
-            </div>
+            <Skeleton className="h-40" />
           ) : activity ? (
             <ActivityChart data={activity.data} days={days} />
           ) : null}
@@ -115,8 +137,13 @@ export function StatsPage() {
         {/* Word status breakdown */}
         <SectionCard title="Phân bố trạng thái từ">
           {breakdownLoading ? (
-            <div className="h-12 flex items-center justify-center text-sm text-gray-400">
-              Đang tải...
+            <div className="space-y-2">
+              <Skeleton className="h-5 rounded-full" />
+              <div className="flex gap-3 mt-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-3 w-16 rounded-full" />
+                ))}
+              </div>
             </div>
           ) : breakdown ? (
             <WordStatusBreakdown status={breakdown.global_status} />
@@ -126,8 +153,10 @@ export function StatsPage() {
         {/* Deck stats table */}
         <SectionCard title="Chi tiết theo bộ thẻ">
           {breakdownLoading ? (
-            <div className="h-12 flex items-center justify-center text-sm text-gray-400">
-              Đang tải...
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-10" />
+              ))}
             </div>
           ) : breakdown ? (
             <DeckStatsTable decks={breakdown.decks} />

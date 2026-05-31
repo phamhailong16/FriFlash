@@ -2,15 +2,16 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Phase 6 hoàn thành — Statistics (biểu đồ hoạt động, phân bố trạng thái từ, bảng tiến độ theo bộ thẻ). Đang phát triển tích cực.
+> **Trạng thái:** Phase 7 hoàn thành — Merge deck UI, skeleton loaders, PWA manifest. Còn lại: Phase 8 (Sentry + deploy Vercel/Railway).
 
 ## Tính năng (MVP)
 
-- **Quản lý bộ thẻ** — Tạo, sửa, xoá, gộp bộ thẻ, bulk delete, tìm kiếm, phân trang
+- **Quản lý bộ thẻ** — Tạo, sửa, xoá, gộp bộ thẻ (merge), bulk delete, tìm kiếm, phân trang
 - **Từ vựng thông minh** — Tự động tra hanzii.net khi thêm chữ Hán, hỗ trợ nhiều âm đọc / nghĩa (VariantGroup)
 - **Import hàng loạt** — Nhập từ file Excel (.xlsx/.xls) hoặc Google Sheets (public link)
 - **Chế độ học** — Lật thẻ 3D, vuốt phải/trái để đánh dấu Đã Biết / Chưa Biết, tổng kết phiên học với progress ring
 - **Thống kê** — Biểu đồ hoạt động (7/30/90 ngày), phân bố trạng thái từ, bảng tiến độ per-deck, chuỗi ngày học liên tiếp
+- **PWA** — Cài đặt như app native (Add to Home Screen), hoạt động offline-friendly
 - **Tiếng Việt hoàn toàn** — Giao diện và thông báo lỗi 100% tiếng Việt
 
 ## Tech Stack
@@ -80,7 +81,8 @@ friflash/
 │   │   └── src/
 │   │       ├── components/
 │   │       │   ├── layout/           # AppShell, BottomNav, PageHeader
-│   │       │   ├── decks/            # DeckCard ✅, DeckForm ✅
+│   │       │   ├── ui/               # Skeleton ✅
+│   │       │   ├── decks/            # DeckCard ✅, DeckForm ✅, MergeDeckModal ✅
 │   │       │   ├── words/            # WordRow ✅, WordForm ✅, ImportModal ✅
 │   │       │   ├── study/            # SwipeableCard ✅, SettingsPanel ✅, SessionSummary ✅
 │   │       │   └── stats/            # ActivityChart ✅, WordStatusBreakdown ✅, DeckStatsTable ✅
@@ -112,8 +114,8 @@ friflash/
 | 4 | Import — Excel (.xlsx/.xls) + Google Sheets public link | ✅ Hoàn thành |
 | 5 | Study Mode — card flip 3D, swipe gestures, session summary | ✅ Hoàn thành |
 | 6 | Statistics — activity chart, word status breakdown, deck stats | ✅ Hoàn thành |
-| 7 | Bulk ops + PWA manifest + skeleton loaders + Dialog polish | 🔜 Tiếp theo |
-| 8 | Performance audit (k6) + Sentry + Production deploy | 🔜 |
+| 7 | Polish — Merge deck UI, skeleton loaders, PWA manifest | ✅ Hoàn thành |
+| 8 | Launch Prep — Sentry, CORS hardening, deploy Vercel + Railway, k6 | 🔜 Tiếp theo |
 
 ## Import Format
 
@@ -132,13 +134,23 @@ Giới hạn: **10 MB** · **5.000 dòng**. Duplicate được cho phép.
 
 ## Môi trường biến
 
-Tạo file `apps/api/.env` từ `.env.example`:
+**Backend** — tạo `apps/api/.env` từ `.env.example`:
 
 ```env
 DATABASE_URL=postgresql+asyncpg://user:password@host:5432/friflash
 SECRET_KEY=<openssl rand -hex 32>
 CORS_ORIGINS=["http://localhost:5173"]
+SENTRY_DSN=                          # để trống khi dev
 ```
+
+**Frontend** — tạo `apps/web/.env.local` (dev không cần, chỉ cần khi build cho prod):
+
+```env
+VITE_API_URL=https://your-railway-app.up.railway.app
+VITE_SENTRY_DSN=                     # để trống khi dev
+```
+
+> Khi dev, frontend dùng Vite proxy (`/api` → `localhost:8000`) nên không cần `VITE_API_URL`.
 
 ## Statistics API
 

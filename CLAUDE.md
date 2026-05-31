@@ -193,11 +193,30 @@ New files:
 - `apps/web/src/components/stats/DeckStatsTable.tsx` — bảng per-deck + mini progress bar
 - `apps/web/src/pages/StatsPage.tsx` — full implementation thay placeholder
 
-### Phase 7 — Bulk Ops + Polish 🔜
-Merge deck UI, bulk delete, skeleton loaders, PWA manifest.
+### Phase 7 — Bulk Ops + Polish ✅ (2026-05-31)
+- **Merge Deck UI:** `MergeDeckModal` (bottom sheet, searchable deck list, preview tên mới truncated 50 chars), "Gộp vào..." item trong DeckCard dropdown, wired với `useMergeDecks()` hook.
+- **Bulk Delete:** Đã có đầy đủ từ Phase 2 — toolbar Chọn/Xoá.
+- **Skeleton Loaders:** `Skeleton` component (`components/ui/Skeleton.tsx`); áp dụng vào DecksPage (4 card), WordsPage (5 row), StatsPage (overview cards + `StatCardSkeleton`, activity chart, breakdown bar + table rows).
+- **PWA Manifest:** `public/manifest.webmanifest` (name, theme_color `#C0392B`, display: standalone), SVG icons 192/512 (ký tự 闪), meta tags PWA + Apple Touch trong `index.html`.
 
-### Phase 8 — Launch Prep 🔜
-k6 perf audit, Sentry, deploy Vercel + Railway, CORS hardening.
+New files:
+- `apps/web/src/components/ui/Skeleton.tsx`
+- `apps/web/src/components/decks/MergeDeckModal.tsx`
+- `apps/web/public/manifest.webmanifest`
+- `apps/web/public/icon-192.svg` · `icon-512.svg`
+
+### Phase 8 — Launch Prep 🔜 (planned 2026-05-31)
+**Plan đã approved. Implement trong session tiếp theo.**
+
+Thứ tự implement:
+1. **Frontend API URL** — thêm `VITE_API_URL` env var, đổi `baseURL` trong `apps/web/src/lib/api.ts` từ `"/api/v1"` thành `(import.meta.env.VITE_API_URL ?? "") + "/api/v1"`; tạo `apps/web/.env.example`
+2. **CORS hardening** — restrict `allow_methods=["GET","POST","PATCH","DELETE","OPTIONS"]` và `allow_headers=["Content-Type","Authorization"]` trong `apps/api/app/main.py`
+3. **Sentry backend** — thêm `sentry-sdk[fastapi]` vào `pyproject.toml`, add `SENTRY_DSN` vào `config.py`, init trong `main.py` (only if DSN set)
+4. **Sentry frontend** — `pnpm add @sentry/react`, init trong `apps/web/src/main.tsx` với `VITE_SENTRY_DSN`
+5. **Deploy configs** — `vercel.json` ở root (SPA routing + build command), `apps/api/railway.toml` (startCommand: `alembic upgrade head && uvicorn ...`)
+6. **k6 scripts** — `k6/smoke.js` (1 VU, 30s) + `k6/load.js` (50 VU, 2 phút); flow: login → GET /decks → GET /stats/overview → GET study/words
+
+Files sẽ tạo/sửa: `apps/web/src/lib/api.ts` · `apps/web/src/main.tsx` · `apps/web/.env.example` · `apps/api/app/main.py` · `apps/api/app/core/config.py` · `apps/api/pyproject.toml` · `apps/api/.env.example` · `apps/api/railway.toml` · `vercel.json` · `k6/smoke.js` · `k6/load.js`
 
 ---
 
@@ -226,3 +245,8 @@ k6 perf audit, Sentry, deploy Vercel + Railway, CORS hardening.
 | Stats: word status tính trong Python (Phase 6) | Fetch tất cả Words rồi classify trong Python, không dùng SQL CASE | Logic status đã có sẵn ở model; tránh duplicating business logic vào SQL; số từ per user không đủ lớn để cần optimize |
 | Stats: streak tính từ StudySession (Phase 6) | Distinct dates từ `started_at` desc, đếm liên tiếp so với `date.today()` | Đơn giản, chính xác; timezone dùng UTC cho MVP |
 | Stats: fill zeros cho activity (Phase 6) | Build dict từ DB rows rồi iterate over date range, điền 0 cho ngày thiếu | Recharts cần continuous data; không thể để gap trong array |
+| Skeleton component dùng chung (Phase 7) | `components/ui/Skeleton.tsx` thay vì inline `animate-pulse` div | Tái sử dụng ở DecksPage / WordsPage / StatsPage; dễ thay đổi style skeleton sau này |
+| MergeDeckModal: bottom sheet (Phase 7) | Sheet trượt từ dưới thay vì dialog giữa màn hình | Pattern chuẩn cho mobile — không che nội dung, UX tự nhiên hơn trên điện thoại |
+| PWA: manifest không service worker (Phase 7) | Chỉ thêm `manifest.webmanifest` + meta tags; bỏ qua SW cho Phase 7 | Service worker cần Workbox + chiến lược cache phức tạp; manifest đủ để làm installable prompt trên Chrome; SW sẽ thêm Phase 8 |
+| getMergeName truncation (Phase 7) | `full.slice(0, 47) + "..."` nếu `source-target` > 50 chars | Theo FRD business rule; dùng 47 thay 47+3="..." để tổng đúng 50 |
+| Skeleton cho StatsPage (Phase 7) | `StatCardSkeleton` riêng biệt thay vì `"—"` placeholder | Shape skeleton sát với layout thật hơn; UX tốt hơn — người dùng thấy layout trước khi data load |

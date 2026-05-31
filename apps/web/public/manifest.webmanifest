@@ -1,0 +1,23 @@
+{
+  "name": "FriFlash — Học từ vựng tiếng Trung",
+  "short_name": "FriFlash",
+  "description": "Ứng dụng flashcard học từ vựng tiếng Trung dành cho người Việt",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#C0392B",
+  "background_color": "#FDFAF6",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

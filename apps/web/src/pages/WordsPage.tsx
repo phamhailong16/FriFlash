@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Plus, ChevronLeft, Upload, BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { WordRow } from "@/components/words/WordRow";
 import { WordForm } from "@/components/words/WordForm";
 import { ImportModal } from "@/components/words/ImportModal";
@@ -95,9 +96,9 @@ export function WordsPage() {
 
         {/* Word list */}
         {isLoading ? (
-          <div className="space-y-0 bg-white rounded-2xl border border-[#E8E0D5] overflow-hidden">
+          <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse bg-gray-100 border-b border-[#E8E0D5] last:border-b-0" />
+              <Skeleton key={i} className="h-16 rounded-xl" />
             ))}
           </div>
         ) : !data || data.items.length === 0 ? (

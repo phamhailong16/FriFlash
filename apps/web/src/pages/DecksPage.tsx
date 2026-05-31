@@ -3,6 +3,8 @@ import { Plus, Search, X, Trash2, CheckSquare } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { DeckCard } from "@/components/decks/DeckCard";
 import { DeckForm } from "@/components/decks/DeckForm";
+import { MergeDeckModal } from "@/components/decks/MergeDeckModal";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useDecks, useDeleteDeck, useBulkDeleteDecks } from "@/hooks/useDecks";
 import type { Deck } from "@/types/api";
 
@@ -19,6 +21,7 @@ export function DecksPage() {
 
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [mergingDeck, setMergingDeck] = useState<Deck | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -163,7 +166,7 @@ export function DecksPage() {
         {isLoading ? (
           <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-28 bg-white border border-[#E8E0D5] rounded-2xl animate-pulse" />
+              <Skeleton key={i} className="h-28 rounded-2xl" />
             ))}
           </div>
         ) : decks.length === 0 ? (
@@ -183,6 +186,7 @@ export function DecksPage() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onSelect={toggleSelect}
+                onMerge={setMergingDeck}
               />
             ))}
           </div>
@@ -225,6 +229,15 @@ export function DecksPage() {
 
       {/* Deck form modal */}
       <DeckForm open={formOpen} deck={editingDeck} onClose={handleFormClose} />
+
+      {/* Merge modal */}
+      {mergingDeck && (
+        <MergeDeckModal
+          open={true}
+          sourceDeck={mergingDeck}
+          onClose={() => setMergingDeck(null)}
+        />
+      )}
     </div>
   );
 }

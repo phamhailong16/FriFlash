@@ -94,30 +94,44 @@ export interface ImportResult {
 }
 
 export interface StatsOverview {
+  total_decks: number;
   total_words: number;
-  studied_words: number;
-  known_words: number;
-  known_rate: number;
-  session_count: number;
+  mastered_words: number;
+  total_sessions: number;
+  streak_days: number;
 }
 
-export interface ActivityData {
-  dates: string[];
-  counts: number[];
+export interface DailyActivity {
+  date: string; // YYYY-MM-DD
+  cards_studied: number;
+  known: number;
+  unknown: number;
 }
 
-export interface WordStatusData {
+export interface ActivityResponse {
+  days: number;
+  data: DailyActivity[];
+}
+
+export interface WordStatusCount {
+  new: number;
+  learning: number;
+  familiar: number;
+  mastered: number;
+  total: number;
+}
+
+export interface DeckStat {
+  deck_id: string;
+  name: string;
+  total_words: number;
   new: number;
   learning: number;
   familiar: number;
   mastered: number;
 }
 
-export interface DeckStat {
-  deck_id: string;
-  deck_name: string;
-  total: number;
-  studied: number;
-  known_rate: number;
-  last_studied: string | null;
+export interface BreakdownResponse {
+  global_status: WordStatusCount;
+  decks: DeckStat[];
 }

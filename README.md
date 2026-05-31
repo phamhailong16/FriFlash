@@ -2,7 +2,7 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Phase 5 hoàn thành — Study Mode (lật thẻ 3D, vuốt Known/Unknown, tổng kết phiên học). Đang phát triển tích cực.
+> **Trạng thái:** Phase 6 hoàn thành — Statistics (biểu đồ hoạt động, phân bố trạng thái từ, bảng tiến độ theo bộ thẻ). Đang phát triển tích cực.
 
 ## Tính năng (MVP)
 
@@ -10,7 +10,7 @@
 - **Từ vựng thông minh** — Tự động tra hanzii.net khi thêm chữ Hán, hỗ trợ nhiều âm đọc / nghĩa (VariantGroup)
 - **Import hàng loạt** — Nhập từ file Excel (.xlsx/.xls) hoặc Google Sheets (public link)
 - **Chế độ học** — Lật thẻ 3D, vuốt phải/trái để đánh dấu Đã Biết / Chưa Biết, tổng kết phiên học với progress ring
-- **Thống kê** — Biểu đồ hoạt động, tỉ lệ nhớ, phân loại từ theo mức độ *(Phase 6)*
+- **Thống kê** — Biểu đồ hoạt động (7/30/90 ngày), phân bố trạng thái từ, bảng tiến độ per-deck, chuỗi ngày học liên tiếp
 - **Tiếng Việt hoàn toàn** — Giao diện và thông báo lỗi 100% tiếng Việt
 
 ## Tech Stack
@@ -82,20 +82,21 @@ friflash/
 │   │       │   ├── layout/           # AppShell, BottomNav, PageHeader
 │   │       │   ├── decks/            # DeckCard ✅, DeckForm ✅
 │   │       │   ├── words/            # WordRow ✅, WordForm ✅, ImportModal ✅
-│   │       │   └── study/            # SwipeableCard ✅, SettingsPanel ✅, SessionSummary ✅
-│   │       ├── hooks/                # useDecks ✅, useWords ✅, useImport ✅, useStudy ✅
-│   │       ├── lib/                  # api.ts, decks.ts ✅, words.ts ✅, import.ts ✅, study.ts ✅, messages.ts
-│   │       ├── pages/                # AuthPage ✅, DecksPage ✅, WordsPage ✅, StudyPage ✅, StatsPage (placeholder)
+│   │       │   ├── study/            # SwipeableCard ✅, SettingsPanel ✅, SessionSummary ✅
+│   │       │   └── stats/            # ActivityChart ✅, WordStatusBreakdown ✅, DeckStatsTable ✅
+│   │       ├── hooks/                # useDecks ✅, useWords ✅, useImport ✅, useStudy ✅, useStats ✅
+│   │       ├── lib/                  # api.ts, decks.ts ✅, words.ts ✅, import.ts ✅, study.ts ✅, stats.ts ✅, messages.ts
+│   │       ├── pages/                # AuthPage ✅, DecksPage ✅, WordsPage ✅, StudyPage ✅, StatsPage ✅
 │   │       ├── store/                # authStore, settingsStore, studySessionStore ✅
 │   │       └── types/api.ts          # TypeScript interfaces
 │   └── api/                          # FastAPI backend
 │       ├── migrations/versions/      # 001_initial_schema.py ✅
 │       └── app/
-│           ├── api/v1/               # auth ✅, decks ✅, words ✅, imports ✅, study ✅
+│           ├── api/v1/               # auth ✅, decks ✅, words ✅, imports ✅, study ✅, stats ✅
 │           ├── core/                 # config, security (JWT), deps (auth middleware)
 │           ├── db/models/            # User, Deck, Word, VariantGroup, StudySession
-│           ├── schemas/              # auth ✅, deck ✅, word ✅, import_ ✅, study ✅
-│           └── services/             # deck ✅, word ✅, import_ ✅, study ✅
+│           ├── schemas/              # auth ✅, deck ✅, word ✅, import_ ✅, study ✅, stats ✅
+│           └── services/             # deck ✅, word ✅, import_ ✅, study ✅, stats ✅
 ├── FriFlash_BRD.docx                 # Business Requirements
 ├── FriFlash_FRD.docx                 # Functional Requirements
 └── CLAUDE.md                         # Hướng dẫn cho Claude Code
@@ -110,8 +111,8 @@ friflash/
 | 3 | Word Management — CRUD, auto-lookup hanzii.net, multi-variant | ✅ Hoàn thành |
 | 4 | Import — Excel (.xlsx/.xls) + Google Sheets public link | ✅ Hoàn thành |
 | 5 | Study Mode — card flip 3D, swipe gestures, session summary | ✅ Hoàn thành |
-| 6 | Statistics — activity chart, word status breakdown, deck stats | 🔜 Tiếp theo |
-| 7 | Bulk ops + PWA manifest + skeleton loaders + Dialog polish | 🔜 |
+| 6 | Statistics — activity chart, word status breakdown, deck stats | ✅ Hoàn thành |
+| 7 | Bulk ops + PWA manifest + skeleton loaders + Dialog polish | 🔜 Tiếp theo |
 | 8 | Performance audit (k6) + Sentry + Production deploy | 🔜 |
 
 ## Import Format
@@ -138,6 +139,14 @@ DATABASE_URL=postgresql+asyncpg://user:password@host:5432/friflash
 SECRET_KEY=<openssl rand -hex 32>
 CORS_ORIGINS=["http://localhost:5173"]
 ```
+
+## Statistics API
+
+| Endpoint | Mô tả |
+|---|---|
+| `GET /api/v1/stats/overview` | Tổng quan: số deck, từ, từ đã thuộc, tổng phiên, chuỗi ngày học |
+| `GET /api/v1/stats/activity?days=30` | Hoạt động theo ngày (7 / 30 / 90 ngày) |
+| `GET /api/v1/stats/breakdown` | Phân bố trạng thái từ (global + per deck) |
 
 ## API Docs
 

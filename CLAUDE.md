@@ -178,8 +178,20 @@ New files:
 - `apps/web/src/components/study/SessionSummary.tsx` — kết quả cuối phiên + SVG progress ring
 - `apps/web/src/pages/StudyPage.tsx` — full-screen study flow (route ngoài AppShell)
 
-### Phase 6 — Statistics 🔜
-ActivityChart (Recharts), WordStatusBreakdown, DeckStatsTable, time filters.
+### Phase 6 — Statistics ✅ (2026-05-31)
+Endpoints: `GET /api/v1/stats/overview` · `GET /api/v1/stats/activity?days=` · `GET /api/v1/stats/breakdown` — tất cả có auth guard.
+UI: 4 StatCard (tổng deck, tổng từ, đã thuộc, chuỗi ngày) · ActivityChart (Recharts AreaChart, time filter 7/30/90 ngày) · WordStatusBreakdown (stacked bar + legend 4 trạng thái) · DeckStatsTable (bảng per-deck với mini progress bar).
+
+New files:
+- `apps/api/app/schemas/stats.py` — StatsOverview, DailyActivity, ActivityResponse, WordStatusCount, DeckStat, BreakdownResponse
+- `apps/api/app/services/stats.py` — get_overview (streak tính từ StudySession), get_activity (fill zeros cho ngày không học), get_breakdown (word status per deck)
+- `apps/api/app/api/v1/stats.py` — 3 endpoints
+- `apps/web/src/lib/stats.ts` — API client
+- `apps/web/src/hooks/useStats.ts` — useStatsOverview, useStatsActivity, useStatsBreakdown
+- `apps/web/src/components/stats/ActivityChart.tsx` — Recharts AreaChart (known/unknown) + custom tooltip
+- `apps/web/src/components/stats/WordStatusBreakdown.tsx` — stacked bar + legend
+- `apps/web/src/components/stats/DeckStatsTable.tsx` — bảng per-deck + mini progress bar
+- `apps/web/src/pages/StatsPage.tsx` — full implementation thay placeholder
 
 ### Phase 7 — Bulk Ops + Polish 🔜
 Merge deck UI, bulk delete, skeleton loaders, PWA manifest.
@@ -211,3 +223,6 @@ k6 perf audit, Sentry, deploy Vercel + Railway, CORS hardening.
 | Framer Motion drag thay @use-gesture (Phase 5) | Dùng `drag="x"` + `onDragEnd` của Framer Motion thay vì `@use-gesture/react` | Package không được cài; Framer Motion drag đủ mượt cho swipe card trên mobile |
 | Fire-and-forget evaluate (Phase 5) | Client gọi `POST /evaluate` không await result trước khi chuyển thẻ | UX instant — người dùng không bị chờ network; consistent với quyết định kiến trúc đã ghi ở trên |
 | CSS perspective + backfaceVisibility (Phase 5) | perspective trên div container, `style={{ transformStyle: "preserve-3d" }}` trên motion.div flip | Tránh conflict giữa Framer Motion transform và CSS 3D stacking context; perspective phải là parent trực tiếp của phần tử rotate |
+| Stats: word status tính trong Python (Phase 6) | Fetch tất cả Words rồi classify trong Python, không dùng SQL CASE | Logic status đã có sẵn ở model; tránh duplicating business logic vào SQL; số từ per user không đủ lớn để cần optimize |
+| Stats: streak tính từ StudySession (Phase 6) | Distinct dates từ `started_at` desc, đếm liên tiếp so với `date.today()` | Đơn giản, chính xác; timezone dùng UTC cho MVP |
+| Stats: fill zeros cho activity (Phase 6) | Build dict từ DB rows rồi iterate over date range, điền 0 cho ngày thiếu | Recharts cần continuous data; không thể để gap trong array |

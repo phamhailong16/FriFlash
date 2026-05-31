@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { Word, WordListResponse, VariantGroup } from "../types/api";
+import type { Word, WordListResponse } from "../types/api";
 
 export interface WordListParams {
   page: number;

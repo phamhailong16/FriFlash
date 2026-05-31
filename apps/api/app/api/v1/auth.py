@@ -15,12 +15,13 @@ REFRESH_COOKIE = "refresh_token"
 
 
 def _set_refresh_cookie(response: Response, token: str) -> None:
+    is_prod = settings.ENVIRONMENT == "production"
     response.set_cookie(
         key=REFRESH_COOKIE,
         value=token,
         httponly=True,
-        samesite="strict",
-        secure=False,  # set True in production
+        samesite="none" if is_prod else "strict",
+        secure=is_prod,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         path="/api/v1/auth",
     )

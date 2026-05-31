@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical, Pencil, Trash2, BookOpen, GitMerge } from "lucide-react";
+import { MoreVertical, Pencil, Trash2, BookOpen, GitMerge, Share2 } from "lucide-react";
 import type { Deck } from "../../types/api";
 
 interface DeckCardProps {
@@ -12,6 +12,7 @@ interface DeckCardProps {
   onSelect?: (id: string) => void;
   onOpen?: (deck: Deck) => void;
   onMerge?: (deck: Deck) => void;
+  onShare?: (deck: Deck) => void;
 }
 
 export function DeckCard({
@@ -23,6 +24,7 @@ export function DeckCard({
   onSelect,
   onOpen,
   onMerge,
+  onShare,
 }: DeckCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -112,6 +114,19 @@ export function DeckCard({
                       >
                         <GitMerge className="w-3.5 h-3.5" />
                         Gộp vào...
+                      </button>
+                    )}
+                    {onShare && (
+                      <button
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          onShare(deck);
+                        }}
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                        Chia sẻ
                       </button>
                     )}
                     <button

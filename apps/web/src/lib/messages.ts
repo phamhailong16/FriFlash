@@ -30,6 +30,17 @@ export const messages: Record<string, string> = {
   "ERR-S002": "Không thể tải thống kê. Vui lòng thử lại.",
   "ERR-S003": "Không có thẻ nào để học trong bộ thẻ này.",
 
+  // Confirm dialogs
+  "CONFIRM-DELETE-DECK": 'Tất cả từ vựng trong bộ thẻ sẽ bị xoá. Hành động này không thể hoàn tác.',
+  "CONFIRM-BULK-DELETE": 'Tất cả từ vựng trong các bộ thẻ đã chọn sẽ bị xoá. Hành động này không thể hoàn tác.',
+  "CONFIRM-DELETE-WORD": 'Từ vựng sẽ bị xoá vĩnh viễn khỏi bộ thẻ.',
+
+  // Share
+  "SHARE-COPY-SUCCESS": "Đã sao chép liên kết!",
+  "SHARE-ENABLED": "Đã bật chia sẻ công khai.",
+  "SHARE-DISABLED": "Đã tắt chia sẻ.",
+  "ERR-SHARE-NOT-FOUND": "Bộ thẻ này không tồn tại hoặc đã bị tắt chia sẻ.",
+
   // Network error
   "ERR-NET": "Mất kết nối mạng. Vui lòng kiểm tra lại.",
 

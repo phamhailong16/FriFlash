@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timezone
 import httpx
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..db.models.deck import Deck
 from ..db.models.word import Word, VariantGroup
@@ -15,26 +16,27 @@ async def list_words(
     page: int,
     size: int,
 ) -> tuple[list[Word], int]:
-    query = select(Word).where(Word.deck_id == deck_id)
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    base = select(Word).where(Word.deck_id == deck_id)
+    total_result = await db.execute(select(func.count()).select_from(base.subquery()))
     total = total_result.scalar_one()
-    query = query.order_by(Word.created_at.desc()).offset((page - 1) * size).limit(size)
+    query = (
+        base
+        .options(selectinload(Word.variant_groups))
+        .order_by(Word.created_at.desc())
+        .offset((page - 1) * size)
+        .limit(size)
+    )
     result = await db.execute(query)
-    words = result.scalars().all()
-    # eagerly load variant_groups for each word
-    for word in words:
-        await db.refresh(word, ["variant_groups"])
-    return words, total
+    return result.scalars().all(), total
 
 
 async def get_word(db: AsyncSession, word_id: str, deck_id: str) -> Word | None:
     result = await db.execute(
-        select(Word).where(Word.id == word_id, Word.deck_id == deck_id)
+        select(Word)
+        .where(Word.id == word_id, Word.deck_id == deck_id)
+        .options(selectinload(Word.variant_groups))
     )
-    word = result.scalar_one_or_none()
-    if word:
-        await db.refresh(word, ["variant_groups"])
-    return word
+    return result.scalar_one_or_none()
 
 
 async def create_word(db: AsyncSession, deck_id: str, data: WordCreate) -> Word:

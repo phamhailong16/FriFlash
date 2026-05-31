@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { Volume2 } from "lucide-react";
 import type { Word, StudySettings } from "@/types/api";
 
 interface Props {
@@ -14,6 +15,21 @@ export function SwipeableCard({ word, settings, cardNumber, totalCards, onResult
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const x = useMotionValue(0);
+
+  const speak = useCallback(() => {
+    if (!("speechSynthesis" in window)) return;
+    const utt = new SpeechSynthesisUtterance(word.hanzi);
+    utt.lang = "zh-CN";
+    utt.rate = 0.85;
+    const zhVoice = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith("zh"));
+    if (zhVoice) utt.voice = zhVoice;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utt);
+  }, [word.hanzi]);
+
+  useEffect(() => {
+    if (isFlipped && settings.auto_pronounce) speak();
+  }, [isFlipped, settings.auto_pronounce, speak]);
 
   const knownOpacity = useTransform(x, [0, 100], [0, 1]);
   const unknownOpacity = useTransform(x, [-100, 0], [1, 0]);
@@ -123,6 +139,15 @@ export function SwipeableCard({ word, settings, cardNumber, totalCards, onResult
               style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
               className={cardBase}
             >
+              {/* Speaker button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); speak(); }}
+                className="absolute top-3 right-3 p-2 rounded-lg text-gray-400 hover:text-[#C0392B] hover:bg-gray-100 transition-colors"
+                aria-label="Phát âm"
+              >
+                <Volume2 className="w-4 h-4" />
+              </button>
+
               {showHanziBack && (
                 <span
                   style={{ fontFamily: "'Noto Serif SC', serif", fontSize: 52, lineHeight: 1 }}

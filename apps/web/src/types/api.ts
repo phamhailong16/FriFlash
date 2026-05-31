@@ -15,8 +15,18 @@ export interface Deck {
   name: string;
   description: string | null;
   card_count: number;
+  is_public: boolean;
+  share_token: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface SharedDeck {
+  id: string;
+  name: string;
+  description: string | null;
+  card_count: number;
+  words: Word[];
 }
 
 export interface DeckListResponse {
@@ -45,6 +55,10 @@ export interface Word {
   known_count: number;
   unknown_count: number;
   status: WordStatus;
+  ease_factor: number;
+  sm2_interval: number;
+  repetitions: number;
+  next_review_date: string | null;
   variant_groups: VariantGroup[];
   created_at: string;
   updated_at: string;

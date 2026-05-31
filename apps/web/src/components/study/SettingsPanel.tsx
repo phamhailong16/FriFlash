@@ -86,7 +86,7 @@ function ToggleRow({
 }
 
 export function SettingsPanel({ open, onClose }: Props) {
-  const { random_order, show_hanzi, show_pinyin, show_meaning, setSettings } = useSettingsStore();
+  const { random_order, show_hanzi, show_pinyin, show_meaning, auto_pronounce, setSettings } = useSettingsStore();
 
   return (
     <AnimatePresence>
@@ -131,6 +131,11 @@ export function SettingsPanel({ open, onClose }: Props) {
                 label="Thứ tự ngẫu nhiên"
                 checked={random_order}
                 onChange={(v) => setSettings({ random_order: v })}
+              />
+              <ToggleRow
+                label="Tự đọc phát âm"
+                checked={auto_pronounce}
+                onChange={(v) => setSettings({ auto_pronounce: v })}
               />
               <SelectRow
                 label="Hiển thị Hán tự"

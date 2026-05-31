@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel, field_validator
 
 
@@ -59,6 +59,10 @@ class WordOut(BaseModel):
     known_count: int
     unknown_count: int
     status: str
+    ease_factor: float
+    sm2_interval: int
+    repetitions: int
+    next_review_date: date | None
     created_at: datetime
     updated_at: datetime
     variant_groups: list[VariantGroupOut]

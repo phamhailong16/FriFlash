@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
     HANZII_BASE_URL: str = "https://api.hanzii.net/api"
+    SENTRY_DSN: str | None = None
+    ENVIRONMENT: str = "development"
 
 
 settings = Settings()

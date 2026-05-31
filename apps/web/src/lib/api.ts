@@ -11,7 +11,7 @@ export function getAccessToken() {
 }
 
 export const api = axios.create({
-  baseURL: "/api/v1",
+  baseURL: (import.meta.env.VITE_API_URL ?? "") + "/api/v1",
   withCredentials: true, // send refresh token cookie
 });
 
@@ -29,7 +29,8 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    const isRefreshCall = original.url?.includes("/auth/refresh");
+    if (error.response?.status === 401 && !original._retry && !isRefreshCall) {
       original._retry = true;
 
       if (isRefreshing) {
@@ -44,7 +45,7 @@ api.interceptors.response.use(
       isRefreshing = true;
       try {
         const { data } = await axios.post(
-          "/api/v1/auth/refresh",
+          (import.meta.env.VITE_API_URL ?? "") + "/api/v1/auth/refresh",
           {},
           { withCredentials: true }
         );

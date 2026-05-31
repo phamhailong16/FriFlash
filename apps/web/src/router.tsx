@@ -6,11 +6,16 @@ import { DecksPage } from "@/pages/DecksPage";
 import { StatsPage } from "@/pages/StatsPage";
 import { WordsPage } from "@/pages/WordsPage";
 import { StudyPage } from "@/pages/StudyPage";
+import { SharedDeckPage } from "@/pages/SharedDeckPage";
 
 export const router = createBrowserRouter([
   {
     path: "/auth",
     element: <AuthPage />,
+  },
+  {
+    path: "/share/:token",
+    element: <SharedDeckPage />,
   },
   {
     path: "decks/:deckId/study",

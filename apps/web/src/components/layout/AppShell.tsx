@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
+import { InstallBanner } from "./InstallBanner";
 
 const HIDE_NAV_PREFIXES = ["/decks/", "/auth"];
 
@@ -15,6 +16,7 @@ export function AppShell() {
         <Outlet />
       </main>
       {!hideNav && <BottomNav />}
+      {!hideNav && <InstallBanner />}
     </div>
   );
 }

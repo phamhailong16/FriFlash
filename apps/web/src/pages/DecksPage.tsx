@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { DeckCard } from "@/components/decks/DeckCard";
 import { DeckForm } from "@/components/decks/DeckForm";
 import { MergeDeckModal } from "@/components/decks/MergeDeckModal";
+import { ShareDeckModal } from "@/components/decks/ShareDeckModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useDecks, useDeleteDeck, useBulkDeleteDecks } from "@/hooks/useDecks";
 import type { Deck } from "@/types/api";
@@ -22,6 +24,9 @@ export function DecksPage() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [mergingDeck, setMergingDeck] = useState<Deck | null>(null);
+  const [sharingDeck, setSharingDeck] = useState<Deck | null>(null);
+  const [confirmDeck, setConfirmDeck] = useState<Deck | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -44,8 +49,7 @@ export function DecksPage() {
   }
 
   function handleDelete(deck: Deck) {
-    if (!window.confirm(`Xoá bộ thẻ "${deck.name}"? Tất cả từ vựng sẽ bị xoá.`)) return;
-    deleteDeck.mutate(deck.id);
+    setConfirmDeck(deck);
   }
 
   function toggleSelect(id: string) {
@@ -63,8 +67,12 @@ export function DecksPage() {
 
   async function handleBulkDelete() {
     if (selectedIds.size === 0) return;
-    if (!window.confirm(`Xoá ${selectedIds.size} bộ thẻ đã chọn? Hành động này không thể hoàn tác.`)) return;
+    setConfirmBulk(true);
+  }
+
+  async function confirmBulkDelete() {
     await bulkDelete.mutateAsync([...selectedIds]);
+    setConfirmBulk(false);
     exitSelectMode();
   }
 
@@ -187,6 +195,7 @@ export function DecksPage() {
                 onDelete={handleDelete}
                 onSelect={toggleSelect}
                 onMerge={setMergingDeck}
+                onShare={setSharingDeck}
               />
             ))}
           </div>
@@ -238,6 +247,40 @@ export function DecksPage() {
           onClose={() => setMergingDeck(null)}
         />
       )}
+
+      {/* Share modal */}
+      {sharingDeck && (
+        <ShareDeckModal
+          open={true}
+          deck={sharingDeck}
+          onClose={() => setSharingDeck(null)}
+        />
+      )}
+
+      {/* Delete single deck confirm */}
+      <ConfirmDialog
+        open={Boolean(confirmDeck)}
+        title={`Xoá "${confirmDeck?.name}"?`}
+        message="Tất cả từ vựng trong bộ thẻ sẽ bị xoá. Hành động này không thể hoàn tác."
+        confirmLabel="Xoá"
+        destructive
+        onConfirm={() => {
+          if (confirmDeck) deleteDeck.mutate(confirmDeck.id);
+          setConfirmDeck(null);
+        }}
+        onCancel={() => setConfirmDeck(null)}
+      />
+
+      {/* Bulk delete confirm */}
+      <ConfirmDialog
+        open={confirmBulk}
+        title={`Xoá ${selectedIds.size} bộ thẻ?`}
+        message="Tất cả từ vựng trong các bộ thẻ đã chọn sẽ bị xoá. Hành động này không thể hoàn tác."
+        confirmLabel="Xoá tất cả"
+        destructive
+        onConfirm={confirmBulkDelete}
+        onCancel={() => setConfirmBulk(false)}
+      />
     </div>
   );
 }

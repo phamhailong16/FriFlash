@@ -1,11 +1,19 @@
 import math
 import uuid
+import secrets
+import string
 from datetime import datetime, timezone
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..db.models.deck import Deck
 from ..db.models.word import Word
 from ..schemas.deck import DeckCreate, DeckUpdate
+
+_BASE62 = string.ascii_letters + string.digits
+
+
+def _gen_token() -> str:
+    return "".join(secrets.choice(_BASE62) for _ in range(12))
 
 
 async def list_decks(
@@ -126,3 +134,20 @@ async def merge_decks(db: AsyncSession, user_id: str, source_id: str, target_id:
     await db.commit()
     await db.refresh(target)
     return target
+
+
+async def toggle_share(db: AsyncSession, deck: Deck) -> Deck:
+    if not deck.share_token:
+        deck.share_token = _gen_token()
+    deck.is_public = not deck.is_public
+    deck.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(deck)
+    return deck
+
+
+async def get_deck_by_token(db: AsyncSession, token: str) -> Deck | None:
+    result = await db.execute(
+        select(Deck).where(Deck.share_token == token, Deck.is_public.is_(True))
+    )
+    return result.scalar_one_or_none()

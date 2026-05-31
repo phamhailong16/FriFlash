@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Plus, ChevronLeft, Upload, BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { WordRow } from "@/components/words/WordRow";
 import { WordForm } from "@/components/words/WordForm";
 import { ImportModal } from "@/components/words/ImportModal";
@@ -18,6 +19,7 @@ export function WordsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [confirmWord, setConfirmWord] = useState<Word | null>(null);
 
   const { data: deckData } = useDecks({ page: 1, size: 50 });
   const deck = deckData?.items.find((d) => d.id === deckId);
@@ -31,8 +33,7 @@ export function WordsPage() {
   }
 
   function handleDelete(word: Word) {
-    if (!window.confirm(`Xoá từ "${word.hanzi}"?`)) return;
-    deleteWord.mutate(word.id);
+    setConfirmWord(word);
   }
 
   function handleFormClose() {
@@ -174,6 +175,19 @@ export function WordsPage() {
         open={importOpen}
         deckId={deckId!}
         onClose={() => setImportOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(confirmWord)}
+        title={`Xoá "${confirmWord?.hanzi}"?`}
+        message="Từ vựng sẽ bị xoá vĩnh viễn khỏi bộ thẻ."
+        confirmLabel="Xoá"
+        destructive
+        onConfirm={() => {
+          if (confirmWord) deleteWord.mutate(confirmWord.id);
+          setConfirmWord(null);
+        }}
+        onCancel={() => setConfirmWord(null)}
       />
     </div>
   );

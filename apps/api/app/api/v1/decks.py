@@ -90,3 +90,15 @@ async def merge_decks(
     if not result:
         raise HTTPException(status_code=404, detail="ERR-D005")
     return result
+
+
+@router.post("/{deck_id}/share", response_model=DeckOut)
+async def toggle_share(
+    deck_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    deck = await deck_svc.get_deck(db, deck_id, current_user.id)
+    if not deck:
+        raise HTTPException(status_code=404, detail="ERR-D005")
+    return await deck_svc.toggle_share(db, deck)

@@ -53,8 +53,19 @@ class DeckOut(BaseModel):
     name: str
     description: str | None
     card_count: int
+    is_public: bool
+    share_token: str | None
     created_at: datetime
     updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class SharedDeckOut(BaseModel):
+    id: str
+    name: str
+    description: str | None
+    card_count: int
 
     model_config = {"from_attributes": True}
 

@@ -5,11 +5,12 @@ import { cn } from "@/lib/cn";
 interface PageHeaderProps {
   title: string;
   showBack?: boolean;
+  left?: React.ReactNode;
   right?: React.ReactNode;
   className?: string;
 }
 
-export function PageHeader({ title, showBack, right, className }: PageHeaderProps) {
+export function PageHeader({ title, showBack, left, right, className }: PageHeaderProps) {
   const navigate = useNavigate();
 
   return (
@@ -20,7 +21,7 @@ export function PageHeader({ title, showBack, right, className }: PageHeaderProp
       )}
     >
       <div className="flex items-center h-14 px-4 max-w-lg mx-auto gap-3">
-        {showBack && (
+        {left ?? (showBack && (
           <button
             onClick={() => navigate(-1)}
             className="p-1 -ml-1 text-gray-500 hover:text-gray-800 transition-colors"
@@ -28,7 +29,7 @@ export function PageHeader({ title, showBack, right, className }: PageHeaderProp
           >
             <ArrowLeft size={22} />
           </button>
-        )}
+        ))}
         <h1 className="flex-1 text-lg font-semibold text-gray-900 truncate">
           {title}
         </h1>

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, field_validator
+from datetime import datetime
 import re
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -31,7 +32,7 @@ class UserOut(BaseModel):
     id: str
     email: str
     name: str
-    created_at: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

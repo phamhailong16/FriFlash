@@ -2,16 +2,18 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Phase 7 hoàn thành — Merge deck UI, skeleton loaders, PWA manifest. Còn lại: Phase 8 (Sentry + deploy Vercel/Railway).
+> **Trạng thái:** Tất cả phases hoàn thành — app sẵn sàng deploy. Bao gồm SM-2 spaced repetition, TTS phát âm, chia sẻ bộ thẻ công khai, PWA service worker, E2E Playwright tests.
 
 ## Tính năng (MVP)
 
 - **Quản lý bộ thẻ** — Tạo, sửa, xoá, gộp bộ thẻ (merge), bulk delete, tìm kiếm, phân trang
 - **Từ vựng thông minh** — Tự động tra hanzii.net khi thêm chữ Hán, hỗ trợ nhiều âm đọc / nghĩa (VariantGroup)
 - **Import hàng loạt** — Nhập từ file Excel (.xlsx/.xls) hoặc Google Sheets (public link)
-- **Chế độ học** — Lật thẻ 3D, vuốt phải/trái để đánh dấu Đã Biết / Chưa Biết, tổng kết phiên học với progress ring
+- **Chế độ học** — Lật thẻ 3D, vuốt phải/trái để đánh dấu Đã Biết / Chưa Biết, SM-2 spaced repetition, lọc "chỉ ôn tập hôm nay"
+- **TTS Phát âm** — Tự động đọc chữ Hán khi lật thẻ (Web Speech API, zh-CN), nút phát âm manual
+- **Chia sẻ bộ thẻ** — Tạo link công khai để người khác xem mà không cần đăng nhập
 - **Thống kê** — Biểu đồ hoạt động (7/30/90 ngày), phân bố trạng thái từ, bảng tiến độ per-deck, chuỗi ngày học liên tiếp
-- **PWA** — Cài đặt như app native (Add to Home Screen), hoạt động offline-friendly
+- **PWA** — Service worker (offline app shell), cài đặt như app native (Add to Home Screen)
 - **Tiếng Việt hoàn toàn** — Giao diện và thông báo lỗi 100% tiếng Việt
 
 ## Tech Stack
@@ -65,6 +67,10 @@ cp .env.example .env
 .venv/Scripts/python.exe -m alembic upgrade head   # Windows
 # .venv/bin/alembic upgrade head                    # Mac/Linux
 
+# Tạo tài khoản test (local dev)
+.venv/Scripts/python.exe seed.py
+# → test@friflash.dev / test1234
+
 # Khởi động server
 .venv/Scripts/python.exe -m uvicorn app.main:app --reload  # Windows
 # .venv/bin/uvicorn app.main:app --reload                   # Mac/Linux
@@ -92,9 +98,9 @@ friflash/
 │   │       ├── store/                # authStore, settingsStore, studySessionStore ✅
 │   │       └── types/api.ts          # TypeScript interfaces
 │   └── api/                          # FastAPI backend
-│       ├── migrations/versions/      # 001_initial_schema.py ✅
+│       ├── migrations/versions/      # 001_initial_schema ✅, 002_sm2_and_sharing ✅
 │       └── app/
-│           ├── api/v1/               # auth ✅, decks ✅, words ✅, imports ✅, study ✅, stats ✅
+│           ├── api/v1/               # auth ✅, decks ✅, words ✅, imports ✅, study ✅, stats ✅, share ✅
 │           ├── core/                 # config, security (JWT), deps (auth middleware)
 │           ├── db/models/            # User, Deck, Word, VariantGroup, StudySession
 │           ├── schemas/              # auth ✅, deck ✅, word ✅, import_ ✅, study ✅, stats ✅
@@ -115,7 +121,8 @@ friflash/
 | 5 | Study Mode — card flip 3D, swipe gestures, session summary | ✅ Hoàn thành |
 | 6 | Statistics — activity chart, word status breakdown, deck stats | ✅ Hoàn thành |
 | 7 | Polish — Merge deck UI, skeleton loaders, PWA manifest | ✅ Hoàn thành |
-| 8 | Launch Prep — Sentry, CORS hardening, deploy Vercel + Railway, k6 | 🔜 Tiếp theo |
+| 8 | Launch Prep — Sentry, CORS hardening, deploy configs, k6 load tests | ✅ Hoàn thành |
+| Post | SM-2, TTS, Deck Sharing, PWA Service Worker, E2E Playwright | ✅ Hoàn thành |
 
 ## Import Format
 

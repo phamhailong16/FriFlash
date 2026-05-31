@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { BookOpen, BarChart2, Layers } from "lucide-react";
+import { BarChart2, Layers } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const tabs = [

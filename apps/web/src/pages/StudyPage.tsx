@@ -16,10 +16,12 @@ export function StudyPage() {
   const navigate = useNavigate();
   const settings = useSettingsStore();
 
+  const [dueOnly, setDueOnly] = useState(false);
+
   const { data: deckData } = useDecks({ page: 1, size: 50 });
   const deck = deckData?.items.find((d) => d.id === deckId);
 
-  const { data: words, isLoading, isError } = useStudyWords(deckId!);
+  const { data: words, isLoading, isError } = useStudyWords(deckId!, dueOnly);
 
   const { cards, currentIndex, results, isComplete, startSession, submitResult } =
     useStudySessionStore();
@@ -127,23 +129,37 @@ export function StudyPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF6] flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 pt-12 pb-4">
-        <button
-          onClick={() => navigate(`/decks/${deckId}/words`)}
-          className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Bộ thẻ
-        </button>
-        <p className="text-sm font-medium text-gray-800 truncate max-w-[140px]">
-          {deck?.name ?? "Học"}
-        </p>
-        <button
-          onClick={() => setSettingsOpen(true)}
-          className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-        >
-          <Settings size={18} />
-        </button>
+      <header className="flex flex-col px-4 pt-12 pb-2">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate(`/decks/${deckId}/words`)}
+            className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            Bộ thẻ
+          </button>
+          <p className="text-sm font-medium text-gray-800 truncate max-w-[140px]">
+            {deck?.name ?? "Học"}
+          </p>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <Settings size={18} />
+          </button>
+        </div>
+        <div className="flex justify-center mt-2">
+          <button
+            onClick={() => { setDueOnly((v) => !v); setSessionStarted(false); }}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+              dueOnly
+                ? "bg-[#C0392B] text-white"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            }`}
+          >
+            {dueOnly ? "Ôn tập hôm nay" : "Tất cả từ"}
+          </button>
+        </div>
       </header>
 
       {/* Card area */}

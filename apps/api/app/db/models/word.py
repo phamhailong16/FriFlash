@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from sqlalchemy import String, Text, Integer, DateTime, ForeignKey
+from datetime import datetime, timezone, date
+from sqlalchemy import String, Text, Integer, Float, DateTime, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..base import Base
 
@@ -13,6 +13,10 @@ class Word(Base):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     known_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     unknown_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    ease_factor: Mapped[float] = mapped_column(Float, default=2.5, nullable=False)
+    sm2_interval: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    repetitions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    next_review_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -8,8 +8,10 @@ export interface StudySessionBody {
 }
 
 export const studyApi = {
-  getWords: async (deckId: string): Promise<Word[]> => {
-    const { data } = await api.get(`/decks/${deckId}/study/words`);
+  getWords: async (deckId: string, dueOnly = false): Promise<Word[]> => {
+    const { data } = await api.get(`/decks/${deckId}/study/words`, {
+      params: dueOnly ? { due_only: true } : undefined,
+    });
     return data;
   },
 

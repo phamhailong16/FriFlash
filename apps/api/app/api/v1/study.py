@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from ...db.session import get_db
 from ...db.models.user import User
@@ -26,11 +26,12 @@ async def _get_deck_or_404(deck_id: str, current_user: User, db: AsyncSession):
 @router.get("/words", response_model=list[WordOut])
 async def get_study_words(
     deck_id: str,
+    due_only: bool = Query(default=False),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     await _get_deck_or_404(deck_id, current_user, db)
-    return await study_svc.get_study_words(db, deck_id)
+    return await study_svc.get_study_words(db, deck_id, due_only=due_only)
 
 
 @router.post("/evaluate", response_model=EvaluateResponse)

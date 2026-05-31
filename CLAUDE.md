@@ -27,6 +27,13 @@ cd apps/api
 
 Backend requires `.env` in `apps/api/` — copy from `.env.example` and set `DATABASE_URL`.
 
+```bash
+# Seed tài khoản test (sau khi migrate xong)
+cd apps/api
+.venv/Scripts/python.exe seed.py
+# → tạo user: test@friflash.dev / test1234
+```
+
 ## Architecture
 
 **Monorepo layout (pnpm workspaces):**
@@ -37,7 +44,9 @@ apps/api/     FastAPI (Python) + SQLAlchemy 2.0 async + Alembic
 
 **Frontend key libraries:** TanStack Query v5 · Zustand · Framer Motion + @use-gesture/react · Recharts · React Hook Form + Zod · React Router v7
 
-**Backend key libraries:** httpx async (hanzii.net proxy) · openpyxl/xlrd (Excel import) · python-jose + passlib[bcrypt] (JWT auth)
+**Backend key libraries:** httpx async (hanzii.net proxy) · openpyxl/xlrd (Excel import) · python-jose + bcrypt (JWT auth)
+
+> ⚠️ `passlib 1.7.4` không tương thích với `bcrypt 5.x`. `security.py` dùng `bcrypt` trực tiếp (không qua passlib) để hash/verify password.
 
 **Auth flow:** On load, App.tsx calls `POST /auth/refresh` (reads HttpOnly cookie) → stores access token in memory → all API calls use `Authorization: Bearer`. On 401, Axios interceptor retries refresh once before redirecting to `/auth`.
 
@@ -205,18 +214,28 @@ New files:
 - `apps/web/public/manifest.webmanifest`
 - `apps/web/public/icon-192.svg` · `icon-512.svg`
 
-### Phase 8 — Launch Prep 🔜 (planned 2026-05-31)
-**Plan đã approved. Implement trong session tiếp theo.**
+### Phase 8 — Launch Prep ✅ (2026-05-31)
+- `VITE_API_URL` env var + `apps/web/.env.example`
+- CORS hardening (restricted methods + headers)
+- Sentry backend (`sentry-sdk[fastapi]`) + Sentry frontend (`@sentry/react`)
+- Deploy configs: `vercel.json` (SPA routing), `apps/api/railway.toml` (startCommand: alembic + uvicorn)
+- k6 load tests: `k6/smoke.js` (1 VU, 30s) + `k6/load.js` (50 VU, 2 phút)
 
-Thứ tự implement:
-1. **Frontend API URL** — thêm `VITE_API_URL` env var, đổi `baseURL` trong `apps/web/src/lib/api.ts` từ `"/api/v1"` thành `(import.meta.env.VITE_API_URL ?? "") + "/api/v1"`; tạo `apps/web/.env.example`
-2. **CORS hardening** — restrict `allow_methods=["GET","POST","PATCH","DELETE","OPTIONS"]` và `allow_headers=["Content-Type","Authorization"]` trong `apps/api/app/main.py`
-3. **Sentry backend** — thêm `sentry-sdk[fastapi]` vào `pyproject.toml`, add `SENTRY_DSN` vào `config.py`, init trong `main.py` (only if DSN set)
-4. **Sentry frontend** — `pnpm add @sentry/react`, init trong `apps/web/src/main.tsx` với `VITE_SENTRY_DSN`
-5. **Deploy configs** — `vercel.json` ở root (SPA routing + build command), `apps/api/railway.toml` (startCommand: `alembic upgrade head && uvicorn ...`)
-6. **k6 scripts** — `k6/smoke.js` (1 VU, 30s) + `k6/load.js` (50 VU, 2 phút); flow: login → GET /decks → GET /stats/overview → GET study/words
+### Post-Launch Features ✅ (2026-05-31)
+- **PWA Service Worker** — `vite-plugin-pwa`, NetworkOnly cho `/api/`, StaleWhileRevalidate cho Google Fonts
+- **PWA Install Banner** — `usePWAInstall` hook + `InstallBanner` component (trên BottomNav)
+- **E2E Tests** — Playwright, 5 spec files (auth, deck-crud, study-flow, tts, share-deck), Pixel 7 device
+- **TTS Auto-Pronunciation** — Web Speech API, lang `zh-CN`, rate 0.85, nút Volume2 manual + toggle "Tự đọc phát âm"
+- **SM-2 Spaced Repetition** — migration 002, `_sm2_update()`, `due_only` filter, `next_review_date` index
+- **Deck Sharing** — `share_token` (base62 12 chars), `is_public`, public GET `/api/v1/share/{token}`, `SharedDeckPage`
+- **Production cookie fix** — `samesite="none" + secure=True` khi `ENVIRONMENT=production`
 
-Files sẽ tạo/sửa: `apps/web/src/lib/api.ts` · `apps/web/src/main.tsx` · `apps/web/.env.example` · `apps/api/app/main.py` · `apps/api/app/core/config.py` · `apps/api/pyproject.toml` · `apps/api/.env.example` · `apps/api/railway.toml` · `vercel.json` · `k6/smoke.js` · `k6/load.js`
+### Post-Launch Bug Fixes ✅ (2026-05-31)
+- **Infinite reload loop** — Axios interceptor trong `api.ts` bắt 401 từ chính `/auth/refresh` → gọi redirect liên tục. Fix: thêm `!isRefreshCall` guard để bypass interceptor cho refresh requests.
+- **bcrypt compat** — `passlib 1.7.4` crash với `bcrypt 5.x`. Fix: `security.py` dùng `bcrypt.hashpw/checkpw` trực tiếp, bỏ passlib hoàn toàn.
+- **UserOut schema** — `created_at: str` crash khi SQLAlchemy trả `datetime`. Fix: đổi thành `created_at: datetime`.
+- **N+1 query** — `list_words` và `get_study_words` gọi `db.refresh(word, ["variant_groups"])` trong loop → N roundtrips DB. Fix: dùng `selectinload(Word.variant_groups)` trong query gốc → 2 queries tổng bất kể số từ.
+- **seed.py** — Script tạo test user `test@friflash.dev / test1234` cho local dev (idempotent).
 
 ---
 
@@ -250,3 +269,6 @@ Files sẽ tạo/sửa: `apps/web/src/lib/api.ts` · `apps/web/src/main.tsx` · 
 | PWA: manifest không service worker (Phase 7) | Chỉ thêm `manifest.webmanifest` + meta tags; bỏ qua SW cho Phase 7 | Service worker cần Workbox + chiến lược cache phức tạp; manifest đủ để làm installable prompt trên Chrome; SW sẽ thêm Phase 8 |
 | getMergeName truncation (Phase 7) | `full.slice(0, 47) + "..."` nếu `source-target` > 50 chars | Theo FRD business rule; dùng 47 thay 47+3="..." để tổng đúng 50 |
 | Skeleton cho StatsPage (Phase 7) | `StatCardSkeleton` riêng biệt thay vì `"—"` placeholder | Shape skeleton sát với layout thật hơn; UX tốt hơn — người dùng thấy layout trước khi data load |
+| bcrypt trực tiếp (Post-launch) | `bcrypt.hashpw/checkpw` thay vì `passlib.CryptContext` | `passlib 1.7.4` không support `bcrypt 5.x`; dùng bcrypt trực tiếp đơn giản hơn và không cần wrapper |
+| Axios interceptor `!isRefreshCall` (Post-launch) | Guard kiểm tra URL trước khi retry refresh | Interceptor bắt 401 từ chính `/auth/refresh` → redirect `/auth` → reload vô tận; guard ngắt vòng lặp |
+| `selectinload` cho variant_groups (Post-launch) | `selectinload(Word.variant_groups)` trong query gốc thay vì loop `db.refresh()` | N+1 queries với deck 600 từ = 600+ roundtrips; selectinload = 2 queries cố định |

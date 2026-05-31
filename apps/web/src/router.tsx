@@ -5,11 +5,20 @@ import { AuthPage } from "@/pages/AuthPage";
 import { DecksPage } from "@/pages/DecksPage";
 import { StatsPage } from "@/pages/StatsPage";
 import { WordsPage } from "@/pages/WordsPage";
+import { StudyPage } from "@/pages/StudyPage";
 
 export const router = createBrowserRouter([
   {
     path: "/auth",
     element: <AuthPage />,
+  },
+  {
+    path: "decks/:deckId/study",
+    element: (
+      <ProtectedRoute>
+        <StudyPage />
+      </ProtectedRoute>
+    ),
   },
   {
     element: (

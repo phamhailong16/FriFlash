@@ -160,8 +160,23 @@ New files:
 
 Column mapping: `hanzi` (required), `pinyin`, `han_viet`, `part_of_speech`, `meaning`, `note` (case-insensitive, underscore-normalized).
 
-### Phase 5 — Study Mode 🔜
-SwipeableCard (Framer Motion 3D flip + @use-gesture/react swipe), settings panel, session summary.
+### Phase 5 — Study Mode ✅ (2026-05-31)
+Endpoints: `GET /api/v1/decks/:id/study/words` · `POST /api/v1/decks/:id/study/evaluate` · `POST /api/v1/decks/:id/study/session` — tất cả có auth guard.
+UI: SwipeableCard (Framer Motion 3D flip, drag swipe left/right, known/unknown overlay) · SettingsPanel (slide-up sheet) · SessionSummary (SVG progress ring, known/unknown stats) · StudyPage (full-screen, ngoài AppShell) · Nút "Học ngay" trên WordsPage.
+
+**Luồng học:** WordsPage → "Học ngay" → StudyPage load từ → tap để flip 3D → vuốt hoặc nhấn Known/Unknown → evaluate fire-and-forget → hết thẻ → SessionSummary → học lại hoặc về bộ thẻ.
+
+New files:
+- `apps/api/app/schemas/study.py` — EvaluateRequest, EvaluateResponse, StudySessionCreate, StudySessionOut
+- `apps/api/app/services/study.py` — get_study_words, evaluate_word, save_session
+- `apps/api/app/api/v1/study.py` — 3 endpoints
+- `apps/web/src/lib/study.ts` — API client
+- `apps/web/src/hooks/useStudy.ts` — useStudyWords (TanStack Query)
+- `apps/web/src/store/studySessionStore.ts` — Zustand: queue thẻ, Fisher-Yates shuffle, index, kết quả
+- `apps/web/src/components/study/SwipeableCard.tsx` — 3D flip + Framer Motion drag + overlay
+- `apps/web/src/components/study/SettingsPanel.tsx` — slide-up sheet cài đặt
+- `apps/web/src/components/study/SessionSummary.tsx` — kết quả cuối phiên + SVG progress ring
+- `apps/web/src/pages/StudyPage.tsx` — full-screen study flow (route ngoài AppShell)
 
 ### Phase 6 — Statistics 🔜
 ActivityChart (Recharts), WordStatusBreakdown, DeckStatsTable, time filters.
@@ -192,3 +207,7 @@ k6 perf audit, Sentry, deploy Vercel + Railway, CORS hardening.
 | Tối thiểu 1 VariantGroup (Phase 3) | Nút xóa ẩn khi chỉ còn 1 variant trong form; backend enforce bằng fallback khi `variants=[]` | Business rule cốt lõi — một Word không thể tồn tại không có VariantGroup |
 | Import column mapping (Phase 4) | Normalize header: lowercase + strip + replace space → underscore | Cho phép file Excel có tên cột "Hanzi", "HANZI", "hán tự " đều được nhận dạng; trade-off: tên cột có dấu cách sẽ bị normalize |
 | Import: Duplicates allowed (Phase 4) | Không kiểm tra trùng khi import | Theo FRD — người dùng tự quản lý; đơn giản hóa bulk insert |
+| Study route ngoài AppShell (Phase 5) | `/decks/:id/study` là ProtectedRoute standalone, không wrap AppShell | Study mode cần full-screen immersive — BottomNav che mất không gian thẻ |
+| Framer Motion drag thay @use-gesture (Phase 5) | Dùng `drag="x"` + `onDragEnd` của Framer Motion thay vì `@use-gesture/react` | Package không được cài; Framer Motion drag đủ mượt cho swipe card trên mobile |
+| Fire-and-forget evaluate (Phase 5) | Client gọi `POST /evaluate` không await result trước khi chuyển thẻ | UX instant — người dùng không bị chờ network; consistent với quyết định kiến trúc đã ghi ở trên |
+| CSS perspective + backfaceVisibility (Phase 5) | perspective trên div container, `style={{ transformStyle: "preserve-3d" }}` trên motion.div flip | Tránh conflict giữa Framer Motion transform và CSS 3D stacking context; perspective phải là parent trực tiếp của phần tử rotate |

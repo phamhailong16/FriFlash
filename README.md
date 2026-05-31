@@ -2,14 +2,14 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Phase 4 hoàn thành — Word Management + Import (Excel / Google Sheets). Đang phát triển tích cực.
+> **Trạng thái:** Phase 5 hoàn thành — Study Mode (lật thẻ 3D, vuốt Known/Unknown, tổng kết phiên học). Đang phát triển tích cực.
 
 ## Tính năng (MVP)
 
 - **Quản lý bộ thẻ** — Tạo, sửa, xoá, gộp bộ thẻ, bulk delete, tìm kiếm, phân trang
 - **Từ vựng thông minh** — Tự động tra hanzii.net khi thêm chữ Hán, hỗ trợ nhiều âm đọc / nghĩa (VariantGroup)
 - **Import hàng loạt** — Nhập từ file Excel (.xlsx/.xls) hoặc Google Sheets (public link)
-- **Chế độ học** — Lật thẻ 3D, vuốt phải/trái để đánh dấu Đã Nhớ / Chưa Nhớ *(Phase 5)*
+- **Chế độ học** — Lật thẻ 3D, vuốt phải/trái để đánh dấu Đã Biết / Chưa Biết, tổng kết phiên học với progress ring
 - **Thống kê** — Biểu đồ hoạt động, tỉ lệ nhớ, phân loại từ theo mức độ *(Phase 6)*
 - **Tiếng Việt hoàn toàn** — Giao diện và thông báo lỗi 100% tiếng Việt
 
@@ -20,7 +20,7 @@
 | Frontend | React 18 + Vite + TypeScript + Tailwind CSS (PWA) |
 | State | TanStack Query v5 (server) + Zustand (UI) |
 | Forms | React Hook Form + Zod |
-| Animation | Framer Motion + @use-gesture/react |
+| Animation | Framer Motion (3D flip, drag gesture, spring animation) |
 | Backend | FastAPI (Python 3.12+) + SQLAlchemy 2.0 async |
 | Database | PostgreSQL + Alembic migrations |
 | Auth | JWT access token (15 min, in-memory) + HttpOnly refresh cookie (7 ngày) |
@@ -81,20 +81,21 @@ friflash/
 │   │       ├── components/
 │   │       │   ├── layout/           # AppShell, BottomNav, PageHeader
 │   │       │   ├── decks/            # DeckCard ✅, DeckForm ✅
-│   │       │   └── words/            # WordRow ✅, WordForm ✅, ImportModal ✅
-│   │       ├── hooks/                # useDecks ✅, useWords ✅, useImport ✅
-│   │       ├── lib/                  # api.ts, decks.ts ✅, words.ts ✅, import.ts ✅, messages.ts
-│   │       ├── pages/                # AuthPage ✅, DecksPage ✅, WordsPage ✅, StatsPage (placeholder)
-│   │       ├── store/                # authStore, settingsStore
+│   │       │   ├── words/            # WordRow ✅, WordForm ✅, ImportModal ✅
+│   │       │   └── study/            # SwipeableCard ✅, SettingsPanel ✅, SessionSummary ✅
+│   │       ├── hooks/                # useDecks ✅, useWords ✅, useImport ✅, useStudy ✅
+│   │       ├── lib/                  # api.ts, decks.ts ✅, words.ts ✅, import.ts ✅, study.ts ✅, messages.ts
+│   │       ├── pages/                # AuthPage ✅, DecksPage ✅, WordsPage ✅, StudyPage ✅, StatsPage (placeholder)
+│   │       ├── store/                # authStore, settingsStore, studySessionStore ✅
 │   │       └── types/api.ts          # TypeScript interfaces
 │   └── api/                          # FastAPI backend
 │       ├── migrations/versions/      # 001_initial_schema.py ✅
 │       └── app/
-│           ├── api/v1/               # auth ✅, decks ✅, words ✅, imports ✅
+│           ├── api/v1/               # auth ✅, decks ✅, words ✅, imports ✅, study ✅
 │           ├── core/                 # config, security (JWT), deps (auth middleware)
 │           ├── db/models/            # User, Deck, Word, VariantGroup, StudySession
-│           ├── schemas/              # auth ✅, deck ✅, word ✅, import_ ✅
-│           └── services/             # deck ✅, word ✅, import_ ✅
+│           ├── schemas/              # auth ✅, deck ✅, word ✅, import_ ✅, study ✅
+│           └── services/             # deck ✅, word ✅, import_ ✅, study ✅
 ├── FriFlash_BRD.docx                 # Business Requirements
 ├── FriFlash_FRD.docx                 # Functional Requirements
 └── CLAUDE.md                         # Hướng dẫn cho Claude Code
@@ -108,8 +109,8 @@ friflash/
 | 2 | Deck Management — CRUD, search, pagination, merge, bulk delete | ✅ Hoàn thành |
 | 3 | Word Management — CRUD, auto-lookup hanzii.net, multi-variant | ✅ Hoàn thành |
 | 4 | Import — Excel (.xlsx/.xls) + Google Sheets public link | ✅ Hoàn thành |
-| 5 | Study Mode — card flip 3D, swipe gestures, session summary | 🔜 Tiếp theo |
-| 6 | Statistics — activity chart, word status breakdown, deck stats | 🔜 |
+| 5 | Study Mode — card flip 3D, swipe gestures, session summary | ✅ Hoàn thành |
+| 6 | Statistics — activity chart, word status breakdown, deck stats | 🔜 Tiếp theo |
 | 7 | Bulk ops + PWA manifest + skeleton loaders + Dialog polish | 🔜 |
 | 8 | Performance audit (k6) + Sentry + Production deploy | 🔜 |
 

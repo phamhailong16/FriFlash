@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Plus, ChevronLeft, Upload } from "lucide-react";
+import { Plus, ChevronLeft, Upload, BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { WordRow } from "@/components/words/WordRow";
 import { WordForm } from "@/components/words/WordForm";
@@ -73,13 +73,24 @@ export function WordsPage() {
               </>
             )}
           </div>
-          <button
-            onClick={() => setImportOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-[#E8E0D5] rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            Nhập file
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setImportOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-[#E8E0D5] rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Nhập file
+            </button>
+            {deck && deck.card_count > 0 && (
+              <button
+                onClick={() => navigate(`/decks/${deckId}/study`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#C0392B] rounded-lg hover:bg-[#A93226] transition-colors"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                Học ngay
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Word list */}

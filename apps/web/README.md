@@ -1,73 +1,44 @@
-# React + TypeScript + Vite
+# FriFlash — Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 18 + Vite + TypeScript + Tailwind CSS frontend cho FriFlash.
 
-Currently, two official plugins are available:
+## Chạy
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+# Từ root của monorepo
+pnpm install
+pnpm dev:web
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Hoặc trực tiếp
+cd apps/web
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Mở `http://localhost:5173`. Cần backend đang chạy tại `localhost:8000` — xem `../api/README.md`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Cấu trúc `src/`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+components/
+  layout/       AppShell, BottomNav, PageHeader
+  study/        SwipeableCard, Flashcard, SessionSummary (Phase 5)
+  deck/         DeckCard, DeckForm, MergeModal (Phase 2)
+  word/         WordRow, WordForm, VariantGroupFields (Phase 3)
+  stats/        ActivityChart, WordStatusBreakdown (Phase 6)
+lib/
+  api.ts        Axios instance + auth interceptor tự động refresh token
+  messages.ts   Map ERR-* code → chuỗi tiếng Việt
+  cn.ts         clsx + tailwind-merge helper
+pages/          AuthPage, DecksPage, DeckDetailPage, StudyPage, StatsPage
+store/
+  authStore     User hiện tại, trạng thái loading
+  settingsStore Cài đặt học (persisted vào localStorage)
+types/api.ts    TypeScript interfaces khớp với Pydantic schemas của backend
+```
+
+## Build production
+
+```bash
+pnpm build:web
+# output: apps/web/dist/
 ```

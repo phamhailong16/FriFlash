@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MoreVertical, Pencil, Trash2, BookOpen } from "lucide-react";
 import type { Deck } from "../../types/api";
 
@@ -22,12 +23,15 @@ export function DeckCard({
   onOpen,
 }: DeckCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   function handleCardClick() {
     if (selectMode) {
       onSelect?.(deck.id);
+    } else if (onOpen) {
+      onOpen(deck);
     } else {
-      onOpen?.(deck);
+      navigate(`/decks/${deck.id}/words`);
     }
   }
 

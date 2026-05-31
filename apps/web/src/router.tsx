@@ -4,6 +4,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AuthPage } from "@/pages/AuthPage";
 import { DecksPage } from "@/pages/DecksPage";
 import { StatsPage } from "@/pages/StatsPage";
+import { WordsPage } from "@/pages/WordsPage";
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/decks" replace /> },
       { path: "decks", element: <DecksPage /> },
+      { path: "decks/:deckId/words", element: <WordsPage /> },
       { path: "stats", element: <StatsPage /> },
     ],
   },

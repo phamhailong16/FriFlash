@@ -132,12 +132,33 @@ New files:
 
 ⚠️ **Trước khi test:** Start PostgreSQL, sau đó chạy `.venv/Scripts/python.exe -m alembic upgrade head` trong `apps/api/`.
 
-### Phase 3 — Word Management 🔜
-Endpoints: CRUD `/api/v1/decks/:id/words`, lookup proxy to hanzii.net.
-UI: WordRow, WordForm with VariantGroupFields, auto-lookup on hanzi blur.
+### Phase 3 — Word Management ✅ (2026-05-31)
+Endpoints: `GET/POST /api/v1/decks/:id/words` · `PATCH/DELETE /api/v1/decks/:id/words/:id` · `GET /api/v1/decks/:id/words/lookup?hanzi=` (hanzii.net proxy).
+UI: WordRow (hanzi + pinyin + nghĩa + status badge + dropdown) · WordForm (React Hook Form + Zod, auto-lookup on blur, multi-variant fields) · WordsPage (list, pagination, FAB) · DeckCard navigates to `/decks/:id/words`.
 
-### Phase 4 — Import 🔜
-Excel (.xls/.xlsx) and Google Sheets (public CSV export URL).
+New files:
+- `apps/api/app/schemas/word.py` — WordCreate, WordUpdate, WordOut, VariantGroupOut, WordListResponse
+- `apps/api/app/services/word.py` — CRUD + card_count sync + hanzii.net proxy
+- `apps/api/app/api/v1/words.py` — 5 endpoints
+- `apps/web/src/lib/words.ts` — API client
+- `apps/web/src/hooks/useWords.ts` — TanStack Query hooks
+- `apps/web/src/components/words/WordRow.tsx`
+- `apps/web/src/components/words/WordForm.tsx` — auto-lookup, useFieldArray for variants
+- `apps/web/src/pages/WordsPage.tsx`
+
+### Phase 4 — Import ✅ (2026-05-31)
+Endpoints: `POST /api/v1/decks/:id/import-excel` (multipart) · `POST /api/v1/decks/:id/import-sheets` (URL body).
+UI: ImportModal với 2 tabs (Excel drag-drop + Google Sheets URL), hiển thị kết quả imported/skipped.
+
+New files:
+- `apps/api/app/schemas/import_.py` — ImportResult
+- `apps/api/app/services/import_.py` — parse xlsx/xls/csv, bulk insert, card_count sync
+- `apps/api/app/api/v1/imports.py` — 2 endpoints
+- `apps/web/src/lib/import.ts` — API client
+- `apps/web/src/hooks/useImport.ts` — useMutation hooks
+- `apps/web/src/components/words/ImportModal.tsx`
+
+Column mapping: `hanzi` (required), `pinyin`, `han_viet`, `part_of_speech`, `meaning`, `note` (case-insensitive, underscore-normalized).
 
 ### Phase 5 — Study Mode 🔜
 SwipeableCard (Framer Motion 3D flip + @use-gesture/react swipe), settings panel, session summary.
@@ -166,3 +187,8 @@ k6 perf audit, Sentry, deploy Vercel + Railway, CORS hardening.
 | Alembic migration (Phase 2) | Viết migration thủ công thay vì `--autogenerate` | `autogenerate` yêu cầu kết nối DB live; PostgreSQL chưa chạy trên máy dev Windows nên viết tay từ model definitions |
 | Delete confirmation (Phase 2) | `window.confirm()` thay vì custom Dialog | Chưa có component library Dialog; `window.confirm` đủ dùng cho MVP, sẽ nâng cấp ở Phase 7 polish |
 | Service layer (Phase 2) | `app/services/deck.py` tách khỏi router | Theo pattern đã đặt ra — giữ router mỏng, dễ test service riêng biệt |
+| hanzii.net proxy timeout (Phase 3) | 5 giây, trả về `[]` khi lỗi | Auto-lookup là UX nice-to-have, không được block người dùng; form vẫn dùng được khi lookup fail |
+| Lookup route trước `:word_id` (Phase 3) | `GET /words/lookup` khai báo trước `PATCH /words/{word_id}` | FastAPI match route theo thứ tự — nếu đặt sau, `"lookup"` sẽ bị hiểu là `word_id` |
+| Tối thiểu 1 VariantGroup (Phase 3) | Nút xóa ẩn khi chỉ còn 1 variant trong form; backend enforce bằng fallback khi `variants=[]` | Business rule cốt lõi — một Word không thể tồn tại không có VariantGroup |
+| Import column mapping (Phase 4) | Normalize header: lowercase + strip + replace space → underscore | Cho phép file Excel có tên cột "Hanzi", "HANZI", "hán tự " đều được nhận dạng; trade-off: tên cột có dấu cách sẽ bị normalize |
+| Import: Duplicates allowed (Phase 4) | Không kiểm tra trùng khi import | Theo FRD — người dùng tự quản lý; đơn giản hóa bulk insert |

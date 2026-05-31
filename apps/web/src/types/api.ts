@@ -44,12 +44,21 @@ export interface Word {
   note: string | null;
   known_count: number;
   unknown_count: number;
+  status: WordStatus;
   variant_groups: VariantGroup[];
   created_at: string;
   updated_at: string;
 }
 
 export type WordStatus = "new" | "learning" | "familiar" | "mastered";
+
+export interface WordListResponse {
+  items: Word[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}
 
 export interface StudySession {
   id: string;

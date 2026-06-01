@@ -178,6 +178,7 @@ export function WordForm({ open, deckId, word, onClose }: WordFormProps) {
             </label>
             <div className="relative">
               <input
+                aria-label="Hanzi"
                 {...register("hanzi")}
                 onBlur={handleHanziBlur}
                 autoFocus={!isEdit}

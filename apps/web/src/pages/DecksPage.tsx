@@ -24,13 +24,14 @@ export function DecksPage() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [mergingDeck, setMergingDeck] = useState<Deck | null>(null);
-  const [sharingDeck, setSharingDeck] = useState<Deck | null>(null);
+  const [sharingDeckId, setSharingDeckId] = useState<string | null>(null);
   const [confirmDeck, setConfirmDeck] = useState<Deck | null>(null);
   const [confirmBulk, setConfirmBulk] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, isLoading } = useDecks({ search: debouncedSearch, page, size });
+  const sharingDeck = sharingDeckId ? (data?.items?.find(d => d.id === sharingDeckId) ?? null) : null;
   const deleteDeck = useDeleteDeck();
   const bulkDelete = useBulkDeleteDecks();
 
@@ -195,7 +196,7 @@ export function DecksPage() {
                 onDelete={handleDelete}
                 onSelect={toggleSelect}
                 onMerge={setMergingDeck}
-                onShare={setSharingDeck}
+                onShare={(d) => setSharingDeckId(d.id)}
               />
             ))}
           </div>
@@ -253,7 +254,7 @@ export function DecksPage() {
         <ShareDeckModal
           open={true}
           deck={sharingDeck}
-          onClose={() => setSharingDeck(null)}
+          onClose={() => setSharingDeckId(null)}
         />
       )}
 

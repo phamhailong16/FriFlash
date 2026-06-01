@@ -79,6 +79,7 @@ export function DeckCard({
           {!selectMode && (
             <div className="relative flex-shrink-0">
               <button
+                aria-label="Tuỳ chọn"
                 className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -91,8 +92,9 @@ export function DeckCard({
               {menuOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-0 top-8 z-20 bg-white border border-[#E8E0D5] rounded-xl shadow-lg py-1 min-w-[130px]">
+                  <div role="menu" className="absolute right-0 top-8 z-20 bg-white border border-[#E8E0D5] rounded-xl shadow-lg py-1 min-w-[130px]">
                     <button
+                      role="menuitem"
                       className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -105,6 +107,7 @@ export function DeckCard({
                     </button>
                     {onMerge && (
                       <button
+                        role="menuitem"
                         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -118,6 +121,7 @@ export function DeckCard({
                     )}
                     {onShare && (
                       <button
+                        role="menuitem"
                         className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -130,6 +134,7 @@ export function DeckCard({
                       </button>
                     )}
                     <button
+                      role="menuitem"
                       className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();

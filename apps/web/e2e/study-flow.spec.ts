@@ -10,20 +10,27 @@ test.describe("Study flow", () => {
   });
 
   test("add word then study", async ({ page }) => {
+    const deckName = `Study E2E ${Date.now()}`;
+
     // Create deck for this test
     await page.getByRole("button", { name: "Tạo bộ thẻ mới" }).click();
-    await page.getByLabel("Tên bộ thẻ").fill("Study E2E Deck");
-    await page.getByRole("button", { name: "Tạo" }).click();
+    await page.getByLabel("Tên bộ thẻ").fill(deckName);
+    await page.getByRole("button", { name: "Tạo bộ thẻ", exact: true }).click();
+    // Wait for modal to close
+    await page.getByLabel("Tên bộ thẻ").waitFor({ state: "detached" });
 
     // Navigate into deck
-    await page.getByText("Study E2E Deck").click();
+    await page.getByText(deckName).click();
     await page.waitForURL(/\/decks\/.+\/words/);
 
     // Add word
-    await page.getByRole("button", { name: "Thêm từ" }).click();
+    await page.getByLabel("Thêm từ").click();
     await page.getByLabel("Hanzi").fill("你好");
-    await page.getByRole("button", { name: /Lưu|Thêm/ }).click();
-    await expect(page.getByText("你好")).toBeVisible();
+    // Tab out to trigger lookup, then wait for submit button to be enabled (lookup done)
+    await page.keyboard.press("Tab");
+    await expect(page.locator("form button[type='submit']")).toBeEnabled({ timeout: 10000 });
+    await page.locator("form").getByRole("button", { name: "Thêm từ", exact: true }).click();
+    await expect(page.getByText("你好")).toBeVisible({ timeout: 10000 });
 
     // Start study
     await page.getByRole("button", { name: "Học ngay" }).click();

@@ -12,7 +12,7 @@ test.describe("Deck CRUD", () => {
   test("create a deck", async ({ page }) => {
     await page.getByRole("button", { name: "Tạo bộ thẻ mới" }).click();
     await page.getByLabel("Tên bộ thẻ").fill("E2E Test Deck");
-    await page.getByRole("button", { name: "Tạo" }).click();
+    await page.getByRole("button", { name: "Tạo bộ thẻ", exact: true }).click();
     await expect(page.getByText("E2E Test Deck")).toBeVisible();
   });
 

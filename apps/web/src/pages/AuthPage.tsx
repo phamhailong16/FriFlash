@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -27,7 +27,11 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export function AuthPage() {
   const [tab, setTab] = useState<"login" | "register">("login");
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { setUser, user } = useAuthStore();
+
+  useEffect(() => {
+    if (user) navigate("/decks", { replace: true });
+  }, [user, navigate]);
 
   const loginForm = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
   const registerForm = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
@@ -162,20 +166,24 @@ interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Field = forwardRef<HTMLInputElement, FieldProps>(
-  ({ label, error, ...props }, ref) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <input
-        ref={ref}
-        className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition-colors
-          bg-surface placeholder:text-gray-400
-          focus:border-primary focus:ring-2 focus:ring-primary/20
-          ${error ? "border-unknown" : "border-border"}`}
-        {...props}
-      />
-      {error && <p className="mt-1 text-xs text-unknown">{error}</p>}
-    </div>
-  )
+  ({ label, error, id, ...props }, ref) => {
+    const fieldId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+    return (
+      <div>
+        <label htmlFor={fieldId} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        <input
+          id={fieldId}
+          ref={ref}
+          className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition-colors
+            bg-surface placeholder:text-gray-400
+            focus:border-primary focus:ring-2 focus:ring-primary/20
+            ${error ? "border-unknown" : "border-border"}`}
+          {...props}
+        />
+        {error && <p className="mt-1 text-xs text-unknown">{error}</p>}
+      </div>
+    );
+  }
 );
 
 function SubmitButton({

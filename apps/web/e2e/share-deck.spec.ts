@@ -22,8 +22,7 @@ test.describe("Deck sharing", () => {
     const enableBtn = page.getByRole("button", { name: /Bật chia sẻ/ });
     if (await enableBtn.isVisible()) await enableBtn.click();
 
-    const shareUrl = await page.getByRole("link", { name: /\/share\// }).getAttribute("href")
-      ?? await page.locator("input[readonly]").inputValue();
+    const shareUrl = await page.locator("input[readonly]").inputValue();
 
     expect(shareUrl).toMatch(/\/share\//);
 
@@ -31,7 +30,7 @@ test.describe("Deck sharing", () => {
     const incognito = await chromium.launchPersistentContext("", { headless: true });
     const incognitoPage = await incognito.newPage();
     await incognitoPage.goto(`http://localhost:5173${shareUrl.startsWith("/") ? shareUrl : new URL(shareUrl).pathname}`);
-    await expect(incognitoPage.getByText(/Tạo tài khoản/i)).toBeVisible({ timeout: 8000 });
+    await expect(incognitoPage.getByText(/Tạo tài khoản/i).first()).toBeVisible({ timeout: 8000 });
     await incognito.close();
   });
 });

@@ -237,6 +237,29 @@ New files:
 - **N+1 query** — `list_words` và `get_study_words` gọi `db.refresh(word, ["variant_groups"])` trong loop → N roundtrips DB. Fix: dùng `selectinload(Word.variant_groups)` trong query gốc → 2 queries tổng bất kể số từ.
 - **seed.py** — Script tạo test user `test@friflash.dev / test1234` cho local dev (idempotent).
 
+### QA & Performance Optimization ✅ (2026-06-01)
+
+**E2E Test Fixes (Playwright):**
+- **auth.ts helper** — Đổi `getByPlaceholder` → `getByLabel`; scope submit button vào `locator("form")` để tránh match nút tab "Đăng nhập"
+- **AuthPage accessibility** — `Field` component thêm `htmlFor`/`id` (label↔input), `aria-hidden` trên ký tự `*`; thêm `useEffect` redirect khi đã login
+- **DeckForm accessibility** — `label htmlFor="deck-name"` + `input id="deck-name"`, `aria-hidden` trên `*`
+- **WordForm accessibility** — Thêm `aria-label="Hanzi"` vào hanzi input (label hiển thị là "Chữ Hán" nhưng test dùng `getByLabel("Hanzi")` — Playwright match cả `aria-label`)
+- **DeckCard accessibility** — Thêm `aria-label="Tuỳ chọn"` vào menu toggle button; `role="menu"` lên dropdown container; `role="menuitem"` lên 4 menu items
+- **SwipeableCard** — Thêm `data-testid="flashcard"` để E2E selector ổn định
+- **deck-crud spec** — Đổi `getByRole("button", { name: "Tạo" })` → `{ name: "Tạo bộ thẻ", exact: true }` (FAB cũng match "Tạo")
+- **study-flow spec** — Dùng timestamp-based deck name (`Study E2E ${Date.now()}`) tránh ERR-D002; scope FAB click bằng `getByLabel("Thêm từ")`; wait for hanzii lookup trước khi submit (`expect(submit).toBeEnabled({ timeout: 10_000 })`)
+- **share-deck spec** — Đọc URL qua `input[readonly].inputValue()` (không phải link href); thêm `.first()` cho strict mode
+- **ShareDeckModal stale state (app bug)** — `DecksPage` lưu `sharingDeck` là snapshot → modal không cập nhật sau `toggleShare`. Fix: lưu `sharingDeckId`, derive live từ TanStack Query data. ⚠️ `sharingDeck` phải khai báo SAU `useDecks()` hook (TS error nếu khai báo trước)
+
+**E2E kết quả:** 7/8 pass — 1 skip (`tts.spec.ts`): Web Speech API không hoạt động trong Chromium headless, expected.
+
+**Bundle Optimization (code splitting):**
+- `apps/web/src/router.tsx` — Tất cả page components đổi sang `React.lazy()` + `Suspense` (fallback null). AuthPage giữ nguyên eager vì là entry point
+- `apps/web/vite.config.ts` — Thêm `build.rollupOptions.output.manualChunks` function (không phải object — Vite 8/Rolldown yêu cầu function form). 7 vendor chunks: `react-vendor`, `router`, `query`, `motion`, `charts`, `forms`, `icons`
+- Kết quả: 1 chunk 1,084 KB → lớn nhất 388 KB (charts, lazy); initial load ~130 KB gzip (react-vendor + router + index). Không còn warning > 500 KB
+
+**k6 Smoke test:** 100% checks pass (4 endpoints: login, decks list, stats overview, study/words), avg ~70ms response time.
+
 ---
 
 ## Important Technical Decisions
@@ -272,3 +295,6 @@ New files:
 | bcrypt trực tiếp (Post-launch) | `bcrypt.hashpw/checkpw` thay vì `passlib.CryptContext` | `passlib 1.7.4` không support `bcrypt 5.x`; dùng bcrypt trực tiếp đơn giản hơn và không cần wrapper |
 | Axios interceptor `!isRefreshCall` (Post-launch) | Guard kiểm tra URL trước khi retry refresh | Interceptor bắt 401 từ chính `/auth/refresh` → redirect `/auth` → reload vô tận; guard ngắt vòng lặp |
 | `selectinload` cho variant_groups (Post-launch) | `selectinload(Word.variant_groups)` trong query gốc thay vì loop `db.refresh()` | N+1 queries với deck 600 từ = 600+ roundtrips; selectinload = 2 queries cố định |
+| Lazy loading pages (QA session) | `React.lazy()` + `Suspense` cho tất cả pages trừ AuthPage; `manualChunks` function form trong Vite 8 | Bundle đơn 1 MB → 7 vendor chunks + page chunks; initial load giảm 87%; Vite 8/Rolldown dùng function chứ không phải object cho `manualChunks` |
+| E2E selectors dùng accessibility API (QA session) | `getByLabel`, `getByRole`, `aria-label`, `htmlFor`/`id` thay vì `getByPlaceholder` hay CSS class | Selectors dựa trên accessibility bền hơn — không bị break khi đổi UI, đồng thời enforce chuẩn a11y trong app |
+| `sharingDeckId` vs `sharingDeck` snapshot (QA session) | Track ID, derive live deck object từ TanStack Query data | Snapshot bị stale sau `toggleShare` → modal không cập nhật; tracking ID đảm bảo luôn nhận data mới nhất từ query cache |

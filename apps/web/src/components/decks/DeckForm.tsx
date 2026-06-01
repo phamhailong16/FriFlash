@@ -103,10 +103,11 @@ export function DeckForm({ open, deck, onClose }: DeckFormProps) {
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="px-5 py-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Tên bộ thẻ <span className="text-red-500">*</span>
+            <label htmlFor="deck-name" className="block text-sm font-medium text-gray-700 mb-1.5">
+              Tên bộ thẻ <span className="text-red-500" aria-hidden="true">*</span>
             </label>
             <input
+              id="deck-name"
               {...register("name")}
               autoFocus
               placeholder="VD: HSK 1, Từ vựng kinh doanh..."

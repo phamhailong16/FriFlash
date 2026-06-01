@@ -88,6 +88,7 @@ export function SwipeableCard({ word, settings, cardNumber, totalCards, onResult
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.1}
         onDragEnd={handleDragEnd}
+        data-testid="flashcard"
         className="relative w-full max-w-sm cursor-pointer"
         onClick={!isFlipped && !isAnimating ? () => setIsFlipped(true) : undefined}
       >

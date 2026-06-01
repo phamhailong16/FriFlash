@@ -2,7 +2,7 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Tất cả phases hoàn thành — app sẵn sàng deploy. Bao gồm SM-2 spaced repetition, TTS phát âm, chia sẻ bộ thẻ công khai, PWA service worker, E2E Playwright tests.
+> **Trạng thái:** Tất cả phases hoàn thành + QA & Performance pass — sẵn sàng deploy. E2E 7/8 pass (TTS skip headless), k6 100%, bundle split (initial load ~130 KB gzip).
 
 ## Tính năng (MVP)
 
@@ -123,6 +123,7 @@ friflash/
 | 7 | Polish — Merge deck UI, skeleton loaders, PWA manifest | ✅ Hoàn thành |
 | 8 | Launch Prep — Sentry, CORS hardening, deploy configs, k6 load tests | ✅ Hoàn thành |
 | Post | SM-2, TTS, Deck Sharing, PWA Service Worker, E2E Playwright | ✅ Hoàn thành |
+| QA | E2E fixes, accessibility attrs, bundle split, k6 verified | ✅ Hoàn thành |
 
 ## Import Format
 
@@ -166,6 +167,54 @@ VITE_SENTRY_DSN=                     # để trống khi dev
 | `GET /api/v1/stats/overview` | Tổng quan: số deck, từ, từ đã thuộc, tổng phiên, chuỗi ngày học |
 | `GET /api/v1/stats/activity?days=30` | Hoạt động theo ngày (7 / 30 / 90 ngày) |
 | `GET /api/v1/stats/breakdown` | Phân bố trạng thái từ (global + per deck) |
+
+## Testing
+
+### E2E (Playwright)
+
+```bash
+cd apps/web
+
+# Chạy tất cả E2E (cần backend + PostgreSQL đang chạy)
+E2E_EMAIL=test@friflash.dev E2E_PASSWORD=test1234 npx playwright test
+
+# Chỉ chạy 1 spec
+npx playwright test deck-crud
+
+# Xem báo cáo HTML
+npx playwright show-report
+```
+
+Kết quả hiện tại: **7/8 pass** — `tts.spec.ts` skip (Web Speech API không hoạt động trong Chromium headless, expected).
+
+Spec files: `auth.spec.ts`, `deck-crud.spec.ts`, `study-flow.spec.ts`, `share-deck.spec.ts`, `tts.spec.ts`
+
+### Load test (k6)
+
+```bash
+# Cài k6: winget install k6 --source winget
+# Smoke test (1 VU, 30s)
+k6 run k6/smoke.js -e BASE_URL=http://localhost:8000 -e TEST_EMAIL=test@friflash.dev -e TEST_PASSWORD=test1234
+
+# Load test (50 VU, 2 phút)
+k6 run k6/load.js -e BASE_URL=http://localhost:8000 -e TEST_EMAIL=test@friflash.dev -e TEST_PASSWORD=test1234
+```
+
+Smoke test kết quả: **100% checks** (login, decks list, stats overview, study/words), avg ~70ms.
+
+### Bundle size
+
+| Chunk | Kích thước | Ghi chú |
+|---|---|---|
+| `react-vendor` | 182 KB | React + ReactDOM |
+| `charts` | 389 KB | Recharts + D3 (lazy — StatsPage) |
+| `motion` | 133 KB | Framer Motion (lazy) |
+| `router` | 94 KB | React Router |
+| `forms` | 87 KB | React Hook Form + Zod |
+| `index` | 80 KB | App shell |
+| Mỗi page chunk | 3–22 KB | Lazy-loaded |
+
+Initial load: ~130 KB gzip (react-vendor + router + index + icons + AuthPage).
 
 ## API Docs
 

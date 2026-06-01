@@ -46,7 +46,7 @@ apps/api/     FastAPI (Python) + SQLAlchemy 2.0 async + Alembic
 
 **Backend key libraries:** httpx async (hanzii.net proxy) · openpyxl/xlrd (Excel import) · python-jose + bcrypt (JWT auth)
 
-> ⚠️ `passlib 1.7.4` không tương thích với `bcrypt 5.x`. `security.py` dùng `bcrypt` trực tiếp (không qua passlib) để hash/verify password.
+> `security.py` dùng `bcrypt` trực tiếp (không qua passlib). `pyproject.toml` đã dùng `bcrypt>=4.0.0` thay vì `passlib[bcrypt]`.
 
 **Auth flow:** On load, App.tsx calls `POST /auth/refresh` (reads HttpOnly cookie) → stores access token in memory → all API calls use `Authorization: Bearer`. On 401, Axios interceptor retries refresh once before redirecting to `/auth`.
 
@@ -260,6 +260,25 @@ New files:
 
 **k6 Smoke test:** 100% checks pass (4 endpoints: login, decks list, stats overview, study/words), avg ~70ms response time.
 
+### Production Deployment ✅ (2026-06-01)
+- **Frontend:** https://fri-flash-web.vercel.app (Vercel — auto-deploy on push to `master`)
+- **Backend:** https://friflash-production.up.railway.app (Railway — auto-deploy on push to `master`)
+- **Database:** PostgreSQL managed by Railway (linked via `${{Postgres.DATABASE_URL}}` reference variable)
+
+**Railway env vars set:**
+- `DATABASE_URL` — reference từ Postgres plugin
+- `SECRET_KEY` — 32-byte hex random
+- `ENVIRONMENT=production`
+- `CORS_ORIGINS=["https://fri-flash-web.vercel.app"]`
+
+**Vercel env vars set:**
+- `VITE_API_URL=https://friflash-production.up.railway.app`
+
+**Infra fixes thực hiện khi deploy:**
+- `pyproject.toml` — đổi `passlib[bcrypt]>=1.7.4` → `bcrypt>=4.0.0` (passlib không dùng, tránh conflict)
+- `apps/api/app/core/config.py` — thêm `@field_validator("DATABASE_URL")` tự động convert `postgres://` / `postgresql://` → `postgresql+asyncpg://` (Railway cung cấp URL không có driver prefix)
+- `vercel.json` ở root repo — Vercel dùng root (không phải `apps/web`) để đọc `buildCommand: "pnpm --filter web build"` và SPA rewrites
+
 ---
 
 ## Important Technical Decisions
@@ -298,3 +317,6 @@ New files:
 | Lazy loading pages (QA session) | `React.lazy()` + `Suspense` cho tất cả pages trừ AuthPage; `manualChunks` function form trong Vite 8 | Bundle đơn 1 MB → 7 vendor chunks + page chunks; initial load giảm 87%; Vite 8/Rolldown dùng function chứ không phải object cho `manualChunks` |
 | E2E selectors dùng accessibility API (QA session) | `getByLabel`, `getByRole`, `aria-label`, `htmlFor`/`id` thay vì `getByPlaceholder` hay CSS class | Selectors dựa trên accessibility bền hơn — không bị break khi đổi UI, đồng thời enforce chuẩn a11y trong app |
 | `sharingDeckId` vs `sharingDeck` snapshot (QA session) | Track ID, derive live deck object từ TanStack Query data | Snapshot bị stale sau `toggleShare` → modal không cập nhật; tracking ID đảm bảo luôn nhận data mới nhất từ query cache |
+| Railway DATABASE_URL validator (Deploy) | `@field_validator` trong `config.py` tự convert `postgres://` → `postgresql+asyncpg://` | Railway cung cấp `postgres://` (không có driver); SQLAlchemy async bắt buộc prefix `+asyncpg`; validator ở config layer tránh phải sửa thủ công biến môi trường |
+| Vercel root directory = repo root (Deploy) | Để trống Root Directory trong Vercel (không phải `apps/web`) | `vercel.json` ở repo root định nghĩa `buildCommand: "pnpm --filter web build"` + SPA rewrites; nếu set root là `apps/web` thì Vercel bỏ qua `vercel.json` và thiếu rewrite → 404 khi refresh |
+| bcrypt dependency trực tiếp (Deploy) | `bcrypt>=4.0.0` trong `pyproject.toml` thay vì `passlib[bcrypt]` | passlib không được dùng trong code; giữ lại gây install conflict không cần thiết trên Railway |

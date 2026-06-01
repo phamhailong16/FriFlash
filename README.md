@@ -2,7 +2,11 @@
 
 Ứng dụng flashcard học tiếng Trung dành cho người Việt — Vietnamese-first Chinese vocabulary flashcard app.
 
-> **Trạng thái:** Tất cả phases hoàn thành + QA & Performance pass — sẵn sàng deploy. E2E 7/8 pass (TTS skip headless), k6 100%, bundle split (initial load ~130 KB gzip).
+> **Trạng thái:** Production live (2026-06-01)
+> - Frontend: https://fri-flash-web.vercel.app
+> - Backend: https://friflash-production.up.railway.app
+>
+> E2E 7/8 pass (TTS skip headless) · k6 100% · bundle split (initial load ~130 KB gzip)
 
 ## Tính năng (MVP)
 
@@ -124,6 +128,7 @@ friflash/
 | 8 | Launch Prep — Sentry, CORS hardening, deploy configs, k6 load tests | ✅ Hoàn thành |
 | Post | SM-2, TTS, Deck Sharing, PWA Service Worker, E2E Playwright | ✅ Hoàn thành |
 | QA | E2E fixes, accessibility attrs, bundle split, k6 verified | ✅ Hoàn thành |
+| Deploy | Railway (backend + PostgreSQL) + Vercel (frontend) | ✅ Live |
 
 ## Import Format
 
